@@ -2,9 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
 import logging
 
-from eldersign.dice import DicePool, Dice
+from eldersign.dice import Dice, DicePool
 from eldersign.symbol import Symbol
-
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,6 @@ class Task(ABC):
             matching_dice_sets = task_symbol.match([d for d in dice if d not in used_dice])
 
             if matching_dice_sets:
-                # import pdb; pdb.set_trace()
                 log.debug("Matched the following combinations of dice: {}".format(matching_dice_sets))
 
                 # Take the match with the smallest number of dice
@@ -58,10 +56,25 @@ class SuccessfulTask:
         return 'SuccessfulTask(task={}, dice=[{}])'.format(self.task, ','.join([str(d) for d in self.dice]))
 
 
+class CluePolicy(ABC):
+    @abstractmethod
+    def act(self, dice: DicePool, adventure: 'AbstractAdventure'):
+        raise NotImplementedError
+
+
 class AbstractAdventure(ABC):
     def __init__(self, tasks: List[Task]):
         self.tasks = tasks
         self.task_completion = {task: False for task in tasks}
+
+    @property
+    def incomplete_tasks(self):
+        tasks = []
+        for t in self.tasks:
+            if not t.complete:
+                tasks.append(t)
+
+        return tasks
 
     def __len__(self):
         return len(self.tasks)
@@ -80,88 +93,3 @@ class AbstractAdventure(ABC):
     @property
     def is_complete(self) -> bool:
         return all(task.complete for task in self.tasks)
-
-
-class UnorderedAdventure(AbstractAdventure):
-    def __init__(self, tasks: List[Task]):
-        super().__init__(tasks)
-
-    def check(self, dice_pool_roll: List[Dice]) -> List[SuccessfulTask]:
-        successful_tasks = []
-        for task in self.tasks:
-            met_task_requirements = task.check_requirements(dice_pool_roll)
-            if met_task_requirements:
-                dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
-                successful_task = SuccessfulTask(
-                    task,
-                    dice_used
-                )
-                successful_tasks.append(successful_task)
-
-        return successful_tasks
-
-
-class OrderedAdventure(AbstractAdventure):
-    def __init__(self, tasks: List[Task]):
-        super().__init__(tasks)
-        self.current_task = 0
-
-    def check(self, dice_pool_roll: List[Dice]) -> List[SuccessfulTask]:
-        task = self.tasks[self.current_task]
-
-        # There can be multiple ways to satisfy the requirements of even
-        # a single task
-        met_task_requirements = task.check_requirements(dice_pool_roll)
-
-        if met_task_requirements:
-            dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
-            successful_task = SuccessfulTask(
-                task,
-                dice_used
-            )
-            return [successful_task, ]
-        else:
-            return []
-
-    def complete_task(self, task: Task):
-        task.complete = True
-        self.current_task += 1
-
-
-class AdventureAttempt:
-    def __init__(self, adventure: AbstractAdventure, dice_pool: DicePool):
-        self.adventure = adventure
-        self.dice_pool = dice_pool
-
-    def attempt(self) -> bool:
-        """True if the adventure is completed."""
-        log.debug("Attempting adventure:\n{}".format(self))
-        while len(self.dice_pool) > 0:
-            self.dice_pool.roll()
-            log.debug('Rolled {}'.format(','.join(str(d.symbol) for d in self.dice_pool)))
-
-            # Check result
-            successful_tasks = self.adventure.check(self.dice_pool)
-            # What's in successful task?
-            # A list of matches
-            # - Each match contains a reference to the task being completed
-            # - and the dice that it would take
-            if successful_tasks:
-                # Choose first available successful task
-                self.adventure.complete_task(successful_tasks[0].task)
-                log.debug("Requirements met, completing task {}.".format(self.adventure.tasks.index(successful_tasks[0].task)))
-                # Remove dice corresponding to this task
-                self.dice_pool.remove(successful_tasks[0].dice)
-            else:
-                # Remove a die
-                log.debug("Requirements not met, discarding a dice.")
-                self.dice_pool.discard()
-
-            log.debug("{} tasks and {} die remaining.".format(
-                len([task for task in self.adventure.tasks if not task.complete]),
-                len(self.dice_pool)
-            ))
-            if self.adventure.is_complete:
-                return True
-
-        return False

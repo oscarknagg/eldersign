@@ -3,10 +3,11 @@ from multiprocessing import Pool
 from copy import deepcopy
 import numpy as np
 
-from eldersign.core import OrderedAdventure, UnorderedAdventure, Task, AdventureAttempt
+from eldersign.core import Task
+from eldersign.adventure import UnorderedAdventure, OrderedAdventure, AdventureAttempt
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
 from eldersign.dice import GreenDice, DicePool, RedDice, YellowDice
-
+from eldersign.policy.clue import FreezeMatchedDice, NaiveCluePolicy
 
 log = logging.getLogger()
 log.setLevel('INFO')
@@ -21,7 +22,8 @@ def attempt(adventure):
 
 
 if __name__ == '__main__':
-    # adventure_card = OrderedAdventure(  # Unknown Kadath
+    # adventure_card = OrderedAdventure(
+    #     # Unknown Kadath
     #     tasks=[
     #         Task([Terror(), SymbolUnion([Terror(), Skull()])]),
     #         Task([Terror(), Terror()]),
@@ -41,17 +43,34 @@ if __name__ == '__main__':
             Task([Skull(), Skull(), Terror()]),
         ]
     )
+    # adventure_card = UnorderedAdventure(
+    #     # R'Lyeh
+    #     tasks=[
+    #         Task([Investigation(1), Investigation(1)]),
+    #         Task([Scroll(), Scroll(), Skull(), Terror()]),
+    #     ]
+    # )
 
     dice = []
     for i in range(6):
         dice.append(GreenDice())
-    dice.append(YellowDice())
+    # dice.append(YellowDice())
     dice.append(RedDice())
 
     dicepool = DicePool(dice)
-    adventure_attempt = AdventureAttempt(adventure_card, dicepool)
+    adventure_attempt = AdventureAttempt(
+        adventure_card,
+        dicepool,
+        num_clues=3,
+        clue_policy=FreezeMatchedDice(),
+        # clue_policy=NaiveCluePolicy(),
+    )
+    # num dice           0    1    2    3
+    # FreezeMatchedDice: 1539 3872 5022 5478
+    # NaiveCluePolicy:   1452 2315 2985 3674
 
     # attempts = []
+    # log.setLevel("DEBUG")
     # for i in range(1):
     #     _attempt = deepcopy(adventure_attempt)
     #     _attempt.attempt()

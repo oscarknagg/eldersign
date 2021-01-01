@@ -9,6 +9,9 @@ class Dice(ABC):
     symbol: Symbol  # The symbol currently showing on the dice
     colour: str
 
+    def __init__(self):
+        self.frozen = False
+
     @abstractmethod
     def roll(self):
         raise NotImplementedError
@@ -64,12 +67,20 @@ class DicePool:
     def __init__(self, dice: List[Dice]):
         self.dice = dice
 
+    def __repr__(self):
+        return self.dice.__repr__()
+
     def __len__(self):
         return len(self.dice)
 
     def roll(self):
         for dice in self.dice:
-            dice.roll()
+            if not dice.frozen:
+                dice.roll()
+
+    def unfreeze(self):
+        for d in self.dice:
+            d.frozen = False
 
     def discard(self) -> Dice:
         for i, dice in enumerate(self.dice):
