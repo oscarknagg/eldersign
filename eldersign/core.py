@@ -76,6 +76,11 @@ class AbstractAdventure(ABC):
 
         return tasks
 
+    @property
+    @abstractmethod
+    def available_tasks(self):
+        raise NotImplementedError
+
     def __len__(self):
         return len(self.tasks)
 

@@ -32,7 +32,7 @@ class SymbolUnion(Symbol):
 
 class Investigation(Symbol):
     def __init__(self, value: int):
-        assert 1 <= value <= 4
+        assert value >= 1
         self.value = value
 
     def __hash__(self):

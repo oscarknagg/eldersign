@@ -3,11 +3,10 @@ from multiprocessing import Pool
 from copy import deepcopy
 import numpy as np
 
-from eldersign.core import Task
-from eldersign.adventure import UnorderedAdventure, OrderedAdventure, AdventureAttempt
-from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
+from eldersign.adventure import AdventureAttempt
 from eldersign.dice import GreenDice, DicePool, RedDice, YellowDice
 from eldersign.policy.clue import FreezeMatchedDice, NaiveCluePolicy
+from eldersign import cards
 
 log = logging.getLogger()
 log.setLevel('INFO')
@@ -21,28 +20,34 @@ def attempt(adventure):
     return adventure.attempt()
 
 
+def setup_attempt(adventure, green: int, yellow: int, red: int, clues: int):
+    dice = []
+    for _ in range(green):
+        dice.append(GreenDice())
+    for _ in range(yellow):
+        dice.append(YellowDice())
+    for _ in range(red):
+        dice.append(RedDice())
+
+    dicepool = DicePool(dice)
+    adventure_attempt = AdventureAttempt(
+        adventure,
+        dicepool,
+        num_clues=clues,
+        clue_policy=NaiveCluePolicy(),
+        # clue_policy=FreezeMatchedDice(reroll_investigation_below=2),
+    )
+
+    return adventure_attempt
+
+
 if __name__ == '__main__':
-    # adventure_card = OrderedAdventure(
-    #     # Unknown Kadath
-    #     tasks=[
-    #         Task([Terror(), SymbolUnion([Terror(), Skull()])]),
-    #         Task([Terror(), Terror()]),
-    #         Task([Scroll(), SymbolUnion([Terror(), Scroll()])]),
-    #     ]
-    # )
     # adventure_card = UnorderedAdventure(
     #     # The Dreamlands
     #     tasks=[
     #         Task([Skull(), Scroll(), Investigation(3)]),
     #     ]
     # )
-    adventure_card = UnorderedAdventure(
-        # City of Gugs
-        tasks=[
-            Task([Investigation(3), Investigation(3), Skull()]),
-            Task([Skull(), Skull(), Terror()]),
-        ]
-    )
     # adventure_card = UnorderedAdventure(
     #     # R'Lyeh
     #     tasks=[
@@ -50,36 +55,39 @@ if __name__ == '__main__':
     #         Task([Scroll(), Scroll(), Skull(), Terror()]),
     #     ]
     # )
+    adventure_card = cards.r_lyeh
 
-    dice = []
-    for i in range(6):
-        dice.append(GreenDice())
-    # dice.append(YellowDice())
-    dice.append(RedDice())
-
-    dicepool = DicePool(dice)
-    adventure_attempt = AdventureAttempt(
-        adventure_card,
-        dicepool,
-        num_clues=3,
-        clue_policy=FreezeMatchedDice(),
-        # clue_policy=NaiveCluePolicy(),
-    )
-    # num dice           0    1    2    3
-    # FreezeMatchedDice: 1539 3872 5022 5478
-    # NaiveCluePolicy:   1452 2315 2985 3674
+    base = setup_attempt(adventure_card, 6, 0, 0, 0)
+    red = setup_attempt(adventure_card, 6, 0, 1, 0)
+    yellow = setup_attempt(adventure_card, 6, 1, 0, 0)
+    clue = setup_attempt(adventure_card, 6, 0, 0, 1)
+    yellow_red = setup_attempt(adventure_card, 6, 1, 1, 0)
+    yellow_red_clue = setup_attempt(adventure_card, 6, 1, 1, 1)
+    stacked = setup_attempt(adventure_card, 6, 1, 1, 3)
 
     # attempts = []
     # log.setLevel("DEBUG")
     # for i in range(1):
-    #     _attempt = deepcopy(adventure_attempt)
+    #     _attempt = deepcopy(clue)
     #     _attempt.attempt()
+    # exit()
 
-    attempts = []
-    for i in range(10000):
-        _attempt = deepcopy(adventure_attempt)
-        attempts.append(_attempt)
-
+    scenarios = {
+        'base': base,
+        'red': red,
+        'yellow': yellow,
+        'clue': clue,
+        'yellow_red': yellow_red,
+        'yellow_red_clue': yellow_red_clue,
+        'stacked': stacked
+    }
     pool = Pool(4)
-    successes = pool.map(attempt, attempts)
-    log.info("{} out {} attempts successful".format(sum(successes), len(successes)))
+
+    for name, scenario in scenarios.items():
+        attempts = []
+        for i in range(10000):
+            _attempt = deepcopy(scenario)
+            attempts.append(_attempt)
+
+        successes = pool.map(attempt, attempts)
+        log.info("{}: {} out {} attempts successful".format(name, sum(successes), len(successes)))
