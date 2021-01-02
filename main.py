@@ -35,27 +35,14 @@ def setup_attempt(adventure, green: int, yellow: int, red: int, clues: int):
         dicepool,
         num_clues=clues,
         clue_policy=NaiveCluePolicy(),
-        # clue_policy=FreezeMatchedDice(reroll_investigation_below=2),
+        # clue_policy=FreezeMatchedDice(reroll_investigation_below=3),
     )
 
     return adventure_attempt
 
 
 if __name__ == '__main__':
-    # adventure_card = UnorderedAdventure(
-    #     # The Dreamlands
-    #     tasks=[
-    #         Task([Skull(), Scroll(), Investigation(3)]),
-    #     ]
-    # )
-    # adventure_card = UnorderedAdventure(
-    #     # R'Lyeh
-    #     tasks=[
-    #         Task([Investigation(1), Investigation(1)]),
-    #         Task([Scroll(), Scroll(), Skull(), Terror()]),
-    #     ]
-    # )
-    adventure_card = cards.r_lyeh
+    adventure_card = cards.founders_rock
 
     base = setup_attempt(adventure_card, 6, 0, 0, 0)
     red = setup_attempt(adventure_card, 6, 0, 1, 0)
@@ -79,7 +66,15 @@ if __name__ == '__main__':
         'clue': clue,
         'yellow_red': yellow_red,
         'yellow_red_clue': yellow_red_clue,
-        'stacked': stacked
+        'stacked': stacked,
+
+        # 'red_clue': setup_attempt(adventure_card, 6, 0, 1, 1),
+        # 'stacked-yellow': setup_attempt(adventure_card, 6, 0, 1, 3),
+
+        # 'yellow_clue': setup_attempt(adventure_card, 6, 1, 0, 1),
+        # 'stacked-red': setup_attempt(adventure_card, 6, 1, 0, 3),
+
+        # 'loadsa_clues': setup_attempt(adventure_card, 6, 0, 0, 3),
     }
     pool = Pool(4)
 
