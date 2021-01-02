@@ -100,3 +100,9 @@ class DicePool:
 
     def __iter__(self):
         return self.dice.__iter__()
+
+    def __contains__(self, item):
+        if isinstance(item, Symbol):
+            return any(d.symbol == item for d in self.dice)
+        else:
+            raise TypeError

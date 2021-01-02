@@ -7,6 +7,8 @@ from eldersign.adventure import AdventureAttempt
 from eldersign.dice import GreenDice, DicePool, RedDice, YellowDice
 from eldersign.policy.clue import FreezeMatchedDice, NaiveCluePolicy
 from eldersign import cards
+from eldersign.character import Character
+from eldersign.core import Board, AncientOne
 
 log = logging.getLogger()
 log.setLevel('INFO')
@@ -20,7 +22,11 @@ def attempt(adventure):
     return adventure.attempt()
 
 
-def setup_attempt(adventure, green: int, yellow: int, red: int, clues: int):
+def setup_attempt(adventure,
+                  green: int,
+                  yellow: int,
+                  red: int,
+                  clues: int):
     dice = []
     for _ in range(green):
         dice.append(GreenDice())
@@ -29,10 +35,26 @@ def setup_attempt(adventure, green: int, yellow: int, red: int, clues: int):
     for _ in range(red):
         dice.append(RedDice())
 
+    ancient_one = AncientOne(max_doom_tokens=12, max_elder_signs=13)
+
+    character = Character(
+        health=5,
+        sanity=5,
+        items=[],
+        trophies=[]
+    )
+    board = Board(
+        adventures=[adventure],
+        other_worlds=[],
+        characters=[character],
+        ancient_one=ancient_one
+    )
+
     dicepool = DicePool(dice)
     adventure_attempt = AdventureAttempt(
         adventure,
         dicepool,
+        character,
         num_clues=clues,
         clue_policy=NaiveCluePolicy(),
         # clue_policy=FreezeMatchedDice(reroll_investigation_below=3),
@@ -42,47 +64,49 @@ def setup_attempt(adventure, green: int, yellow: int, red: int, clues: int):
 
 
 if __name__ == '__main__':
-    adventure_card = cards.founders_rock
+    adventure_card = cards.late_night_visitor
 
     base = setup_attempt(adventure_card, 6, 0, 0, 0)
-    red = setup_attempt(adventure_card, 6, 0, 1, 0)
-    yellow = setup_attempt(adventure_card, 6, 1, 0, 0)
-    clue = setup_attempt(adventure_card, 6, 0, 0, 1)
-    yellow_red = setup_attempt(adventure_card, 6, 1, 1, 0)
-    yellow_red_clue = setup_attempt(adventure_card, 6, 1, 1, 1)
-    stacked = setup_attempt(adventure_card, 6, 1, 1, 3)
+    # red = setup_attempt(adventure_card, 6, 0, 1, 0)
+    # yellow = setup_attempt(adventure_card, 6, 1, 0, 0)
+    # clue = setup_attempt(adventure_card, 6, 0, 0, 1)
+    # yellow_red = setup_attempt(adventure_card, 6, 1, 1, 0)
+    # yellow_red_clue = setup_attempt(adventure_card, 6, 1, 1, 1)
+    # stacked = setup_attempt(adventure_card, 6, 1, 1, 3)
 
-    # attempts = []
-    # log.setLevel("DEBUG")
-    # for i in range(1):
-    #     _attempt = deepcopy(clue)
-    #     _attempt.attempt()
-    # exit()
+    attempts = []
+    log.setLevel("DEBUG")
+    for i in range(1):
+        _attempt = deepcopy(base)
+        _attempt.attempt()
 
-    scenarios = {
-        'base': base,
-        'red': red,
-        'yellow': yellow,
-        'clue': clue,
-        'yellow_red': yellow_red,
-        'yellow_red_clue': yellow_red_clue,
-        'stacked': stacked,
+    log.debug(_attempt.character)
+    exit()
 
-        # 'red_clue': setup_attempt(adventure_card, 6, 0, 1, 1),
-        # 'stacked-yellow': setup_attempt(adventure_card, 6, 0, 1, 3),
-
-        # 'yellow_clue': setup_attempt(adventure_card, 6, 1, 0, 1),
-        # 'stacked-red': setup_attempt(adventure_card, 6, 1, 0, 3),
-
-        # 'loadsa_clues': setup_attempt(adventure_card, 6, 0, 0, 3),
-    }
-    pool = Pool(4)
-
-    for name, scenario in scenarios.items():
-        attempts = []
-        for i in range(10000):
-            _attempt = deepcopy(scenario)
-            attempts.append(_attempt)
-
-        successes = pool.map(attempt, attempts)
-        log.info("{}: {} out {} attempts successful".format(name, sum(successes), len(successes)))
+    # scenarios = {
+    #     'base': base,
+    #     'red': red,
+    #     'yellow': yellow,
+    #     'clue': clue,
+    #     'yellow_red': yellow_red,
+    #     'yellow_red_clue': yellow_red_clue,
+    #     'stacked': stacked,
+    #
+    #     # 'red_clue': setup_attempt(adventure_card, 6, 0, 1, 1),
+    #     # 'stacked-yellow': setup_attempt(adventure_card, 6, 0, 1, 3),
+    #
+    #     # 'yellow_clue': setup_attempt(adventure_card, 6, 1, 0, 1),
+    #     # 'stacked-red': setup_attempt(adventure_card, 6, 1, 0, 3),
+    #
+    #     # 'loadsa_clues': setup_attempt(adventure_card, 6, 0, 0, 3),
+    # }
+    # pool = Pool(4)
+    #
+    # for name, scenario in scenarios.items():
+    #     attempts = []
+    #     for i in range(10000):
+    #         _attempt = deepcopy(scenario)
+    #         attempts.append(_attempt)
+    #
+    #     successes = pool.map(attempt, attempts)
+    #     log.info("{}: {} out {} attempts successful".format(name, sum(successes), len(successes)))

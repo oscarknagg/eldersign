@@ -1,7 +1,7 @@
-from eldersign.core import Task
+from eldersign.core import Task, HealthCost, SanityCost
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
-
+from eldersign.effect import UnionEffect, HealthEffect, SanityEffect, DoomTokenEffect
 
 _monster = Task([Skull(), Investigation(1)])
 
@@ -92,7 +92,7 @@ booth_in_the_back = UnorderedAdventure(
 alien_dissection = OrderedAdventure(
     tasks=[
         Task([Terror()]),
-        Task([Investigation(2)]),
+        Task([Investigation(2)], [SanityCost(1)]),
         Task([Investigation(3), SymbolUnion([Scroll(), Skull()])]),
     ],
     trophy_value=2,
@@ -121,16 +121,16 @@ initiation_into_the_mysteries = OrderedAdventure(
     tasks=[
         Task([Investigation(3), Scroll()]),
         Task([Investigation(2)]),
-        Task([Investigation(1), ], membership='silver_twilight'),
+        Task([Investigation(1)], [SanityCost(1)], membership='silver_twilight'),
     ],
     trophy_value=2
 )
 
 late_night_visitor = UnorderedAdventure(
     tasks=[
-        Task([Terror()]),
+        Task([Terror()], [SanityCost(1)]),
         Task([Terror(), Skull()]),
-        Task([Skull(), ], membership='sheldon_gang'),
+        Task([Skull()], [HealthCost(1)], membership='sheldon_gang'),
     ],
     trophy_value=2,
     event=True
@@ -151,7 +151,8 @@ death_at_the_docks = UnorderedAdventure(
         Task([Scroll(), Skull()]),
     ],
     trophy_value=1,
-    event=True
+    event=True,
+    terror_effect=UnionEffect([HealthEffect(1), SanityEffect(1)])
 )
 
 private_meetings = UnorderedAdventure(
