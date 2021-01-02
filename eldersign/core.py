@@ -9,8 +9,11 @@ log = logging.getLogger(__name__)
 
 
 class Task(ABC):
-    def __init__(self, symbols: List[Symbol]):
+    def __init__(self, symbols: List[Symbol], membership: Optional[str] = None):
         self.symbols: List[Symbol] = symbols
+        assert membership in ('silver_twilight', 'sheldon_gang', None)
+        self.membership = membership
+
         self.complete = False
 
     def __repr__(self):
@@ -64,6 +67,7 @@ class CluePolicy(ABC):
 
 class AbstractAdventure(ABC):
     def __init__(self, tasks: List[Task]):
+        assert all(isinstance(task, Task) for task in tasks)
         self.tasks = tasks
         self.task_completion = {task: False for task in tasks}
 
