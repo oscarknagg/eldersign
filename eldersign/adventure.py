@@ -24,6 +24,10 @@ class UnorderedAdventure(AbstractAdventure):
 
         return successful_tasks
 
+    @property
+    def available_tasks(self):
+        return self.incomplete_tasks
+
 
 class OrderedAdventure(AbstractAdventure):
     def __init__(self, tasks: List[Task]):
@@ -50,6 +54,10 @@ class OrderedAdventure(AbstractAdventure):
     def complete_task(self, task: Task):
         task.complete = True
         self.current_task += 1
+
+    @property
+    def available_tasks(self):
+        return [self.tasks[self.current_task]]
 
 
 class AdventureAttempt:
