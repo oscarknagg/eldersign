@@ -2,6 +2,27 @@ from eldersign.core import Task
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
 from eldersign import effect
+from eldersign import item
+
+
+haunted_by_a_shadowy_figure = UnorderedAdventure(
+    name='Haunted by a Shadowy Figure',
+    tasks=[
+        Task([Skull()]),
+        Task([Scroll(), Investigation(6)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.MonsterAppears(),
+    rewards=[
+        effect.MonsterAppears(),
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.UniqueItem),
+        effect.ElderSignEffect(1),
+    ],
+    penalties=[
+        effect.SanityEffect(-2)
+    ],
+)
 
 
 the_koi_pond = UnorderedAdventure(
@@ -14,12 +35,20 @@ the_koi_pond = UnorderedAdventure(
 )
 
 remains_of_the_high_priest = UnorderedAdventure(
+    name='Remains of the High Priest',
     tasks=[
         Task([Skull()]),
         Task([Scroll(), Investigation(6)]),
     ],
-    trophy_value=2,
-    terror_effect=effect.DiscardAllTerrorDice()
+    trophy_value=1,
+    terror_effect=effect.DiscardAllTerrorDice(),
+    rewards=[
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.Spell),
+    ],
+    penalties=[
+        effect.HealthEffect(-1)
+    ]
 )
 
 the_curator = UnorderedAdventure(

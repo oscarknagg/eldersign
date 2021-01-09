@@ -5,7 +5,22 @@ from eldersign import effect
 from eldersign import item
 
 
-balancing_mind_and_body
+balancing_mind_and_body = UnorderedAdventure(
+    name='Balancing Mind and Body',
+    tasks=[
+        Task([Scroll(), Skull()]),
+        Task([Skull(), Scroll()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.ItemReward(item.CommonItem),
+        effect.ItemReward(item.Spell),
+    ],
+    penalties=[
+        effect.HealthEffect(-1)
+    ],
+    terror_effect=effect.SanityEffect(-1)
+)
 
 vision_of_demise = UnorderedAdventure(
     name='Vision of Demise',

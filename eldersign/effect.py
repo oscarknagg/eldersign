@@ -79,6 +79,11 @@ class MonsterAppearsHere(AdventureEffect):
         pass  # Monsters not implemented yet
 
 
+class MonsterAppears(AdventureEffect):
+    def __call__(self, adventure_attempt, eldersign):
+        pass  # Monsters not implemented yet
+
+
 class ImmediatelyFail(AdventureEffect):
     def __call__(self, adventure_attempt, eldersign):
         adventure_attempt.force_failed = True
