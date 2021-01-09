@@ -5,6 +5,76 @@ from eldersign import effect
 from eldersign import item
 
 
+don_t_fall_asleep = UnorderedAdventure(
+    name="Don't fall asleep",
+    tasks=[
+        Task([Terror()]),
+        Task([Terror(), Terror()]),
+    ],
+    trophy_value=2,
+    at_midnight_effect=effect.EachInvestigator(effect.AddSanity(-1)),
+    rewards=[
+        effect.AddItem(item.Clue),
+        effect.AddItem(item.Spell),
+        effect.AddElderSign(1),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+the_hidden_passage = OrderedAdventure(
+    name="Something has broken free",
+    tasks=[
+        Task([Investigation(3)]),
+        Task([Skull(), Investigation(3)]),
+        Task([Scroll()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(2),
+    ],
+    penalties=[
+        effect.AddHealth(-2),
+    ],
+)
+
+something_has_broken_free = OrderedAdventure(
+    name="Something has broken free",
+    tasks=[
+        Task([Skull()], monster_slot=0),
+        Task([Terror(), Terror()]),
+    ],
+    trophy_value=1,
+    terror_effect=effect.ImmediatelyFail(),
+    rewards=[
+        effect.MonsterAppears(),
+        effect.AddItem(item.Clue),
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.UniqueItem),
+    ],
+    penalties=[
+        effect.AddHealth(-1),
+    ],
+)
+
+hallway_on_fire = OrderedAdventure(
+    name="Hallway on Fire",
+    tasks=[
+        Task([Skull()], [HealthCost(1)]),
+        Task([Skull()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.AddHealth(-1),
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.UniqueItem),
+    ],
+    penalties=[
+        effect.AddHealth(-2),
+    ],
+)
+
 horrible_visions = UnorderedAdventure(
     name="Horrible Visions",
     tasks=[
@@ -721,3 +791,6 @@ r_lyeh = UnorderedAdventure(
     ],
     trophy_value=2
 )
+
+print(r_lyeh.to_art())
+# print(there_s_something_in_the_basement.to_art())

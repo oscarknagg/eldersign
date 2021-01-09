@@ -107,7 +107,18 @@ class AddSanity(InvestigatorEffect):
 
 class Curse(InvestigatorEffect):
     def apply_effect(self, investigator: 'Investigator'):
-        investigator.cursed = True
+        if investigator.blessed:
+            investigator.blessed = False
+        else:
+            investigator.cursed = True
+
+
+class Bless(InvestigatorEffect):
+    def apply_effect(self, investigator: 'Investigator'):
+        if investigator.cursed:
+            investigator.cursed = False
+        else:
+            investigator.blessed = True
 
 
 class DiscardAllTerrorDice(AdventureEffect):

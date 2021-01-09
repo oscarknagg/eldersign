@@ -5,6 +5,60 @@ from eldersign import effect
 from eldersign import item
 
 
+vital_information = OrderedAdventure(
+    name="Vital Information",
+    tasks=[
+        Task([Terror()], monster_slot=0),
+        Task([Scroll()]),
+        Task([Skull()], [SanityCost(1)]),
+    ],
+    trophy_value=1,
+    rewards=[
+        effect.AddElderSign(1),
+        effect.AddItem(item.Clue, 3),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+the_night_watchman = OrderedAdventure(
+    # Lock green dice
+    name="The Night Watchman",
+    tasks=[
+        Task([Skull(), Skull()]),
+        Task([Skull()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(1),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.CommonItem),
+    ],
+    penalties=[
+        effect.AddDoomToken(1),
+        effect.AddHealth(-3),
+    ],
+)
+
+ominous_portents = OrderedAdventure(
+    name="Ominous portents",
+    tasks=[
+        Task([], [SanityCost(2)]),
+        Task([Scroll(), Scroll(), Scroll()]),
+    ],
+    trophy_value=2,
+    at_midnight_effect=effect.EachInvestigator(effect.Curse()),
+    rewards=[
+        effect.Bless(),
+        effect.AddElderSign(1),
+        effect.AddItem(item.Clue),
+    ],
+    penalties=[
+        effect.Curse(),
+    ],
+)
+
 the_hidden_temple = OrderedAdventure(
     name="The Hidden Temple",
     tasks=[

@@ -115,7 +115,8 @@ class Task(ABC):
         # n == 0 means replacement task
         # n >= 1 or more means a partial monster task i.e. the first n symbols are
         # not convered by the monster
-        assert monster_slot < len(self)
+        if monster_slot:
+            assert monster_slot < len(self)
         self.monster_slot = monster_slot
 
     def __repr__(self):
@@ -261,6 +262,46 @@ class AbstractAdventure(ABC, TrophyMixin):
             log.debug("Triggered terror effect: {}".format(self._terror_effect.__class__.__name__))
             self._terror_effect(adventure_attempt, eldersign)
 
+    def to_art(self):
+        from tabulate import tabulate
+        import numpy as np
+        width = 20
+        #
+        # split_name = '\n'.join([self.name[i:i+width] for i in range(0, len(self.name), width)])
+        #
+        tasks = []
+        for task in self.tasks:
+            tasks.append(
+                # ['[{}]'.format(sym.to_art()) for sym in task.symbols]
+                ['{}'.format(sym.to_art()) for sym in task.symbols]
+            )
+        #
+        # card_art = tabulate(tasks).split('\n')
+        # print(card_art)
+
+        tabulated = tabulate(tasks, tablefmt='grid').replace('-', '\u2500')
+        print(tabulated)
+
+        np.array([['']*15]*(len(self.tasks) + 4), dtype=np.unicode)
+        np.array([['']*15]*(len(self.tasks) + 4), dtype=np.unicode)
+        card_array = np.array([[' ']*15]*(len(self.tasks) + 4), dtype=np.unicode)
+
+        card_array[0, 0] = '\u250c'
+        card_array[-1, 0] = '\u2514'
+        card_array[0, -1] = '\u2510'
+        card_array[-1, -1] = '\u2518'
+        card_array[[0, -1], 1:-1] = '\u2500'
+        card_array[1:-1, [0, -1]] = '\u2502'
+
+        for i, task in enumerate(self.tasks):
+            task_chars = ''.join(['[{}]'.format(sym.to_art()) for sym in task.symbols])
+            # print(task_chars)
+            # import pdb; pdb.sset_trace()
+            card_array[i+2, 1:1:+len(task_chars)] = np.array(task_chars, dtype=np.unicode)
+
+        print('\n'.join(''.join(char for char in row) for row in card_array))
+        # return '\n'.join(tasks)
+
 
 class AncientOne:
     def __init__(self, max_doom_tokens: int, max_elder_signs: int):
@@ -337,6 +378,7 @@ class Investigator:
         self.trophies = trophies
 
         self.cursed = False
+        self.blessed = False
 
     def __repr__(self):
         return 'Character(health={},sanity={})'.format(self.health, self.sanity)

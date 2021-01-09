@@ -96,6 +96,10 @@ class Investigation(Symbol):
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, self.value)
 
+    def to_art(self) -> str:
+
+        return str(self.value)
+
 
 class NamedSymbol(Symbol):
     def __init__(self, name: str):
@@ -126,15 +130,24 @@ class Terror(NamedSymbol):
     def __init__(self):
         super().__init__('terror')
 
+    def to_art(self):
+        return "\U0001F419"
+
 
 class Scroll(NamedSymbol):
     def __init__(self):
         super().__init__('scroll')
 
+    def to_art(self):
+        return "\U0001F4DC"
+
 
 class Skull(NamedSymbol):
     def __init__(self):
         super().__init__('skull')
+
+    def to_art(self) -> str:
+        return "\U0001F480"
 
 
 class Wildcard(Symbol):
