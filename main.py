@@ -7,7 +7,7 @@ from eldersign.adventure import AdventureAttempt
 from eldersign.dice import GreenDice, DicePool, RedDice, YellowDice
 from eldersign.policy.clue import FreezeMatchedDice, NaiveCluePolicy
 from eldersign import cards
-from eldersign.core import Board, AncientOne, Character
+from eldersign.core import Board, AncientOne, Investigator
 
 log = logging.getLogger()
 log.setLevel('INFO')
@@ -36,7 +36,7 @@ def setup_attempt(adventure,
 
     ancient_one = AncientOne(max_doom_tokens=12, max_elder_signs=13)
 
-    character = Character(
+    character = Investigator(
         health=5,
         sanity=5,
         items=[],

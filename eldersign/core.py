@@ -38,13 +38,19 @@ class AdventureEffect(ABC):
         raise NotImplementedError
 
 
+class InvestigatorEffect(ABC):
+    @abstractmethod
+    def __call__(self, investigator: 'Investigator'):
+        raise NotImplementedError
+
+
 class Cost(ABC):
     @abstractmethod
-    def check(self, character: 'Character') -> bool:
+    def check(self, character: 'Investigator') -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def apply(self, character: 'Character'):
+    def apply(self, character: 'Investigator'):
         raise NotImplementedError
 
 
@@ -55,10 +61,10 @@ class HealthCost(Cost):
     def __repr__(self):
         return 'Health({})'.format(self.value)
 
-    def check(self, character: 'Character'):
+    def check(self, character: 'Investigator'):
         return character.health > self.value
 
-    def apply(self, character: 'Character'):
+    def apply(self, character: 'Investigator'):
         log.debug("Applying {} to {}".format(self, character))
         character.health -= self.value
 
@@ -70,10 +76,10 @@ class SanityCost(Cost):
     def __repr__(self):
         return 'Sanity({})'.format(self.value)
 
-    def check(self, character: 'Character'):
+    def check(self, character: 'Investigator'):
         return character.sanity > self.value
 
-    def apply(self, character: 'Character'):
+    def apply(self, character: 'Investigator'):
         log.debug("Applying {} to {}".format(self, character))
         character.sanity -= self.value
 
@@ -83,7 +89,7 @@ class Task(ABC):
                  symbols: List[Symbol],
                  costs: Optional[List[Cost]] = None,
                  membership: Optional[str] = None):
-        self.symbols: List[Symbol] = symbols
+        self._symbols: List[Symbol] = symbols
         self.costs: List[Cost] = costs or []
         assert membership in ('silver_twilight', 'sheldon_gang', None)
         self.membership = membership
@@ -99,7 +105,11 @@ class Task(ABC):
     def __len__(self):
         return len(self.symbols)
 
-    def check_requirements(self, dice: List[Dice], character: 'Character') -> Optional[List[Tuple[Symbol, List[Dice]]]]:
+    @property
+    def symbols(self):
+        return self._symbols
+
+    def check_requirements(self, dice: List[Dice], character: 'Investigator') -> Optional[List[Tuple[Symbol, List[Dice]]]]:
         """Checks whether the requirements of this task are met.
 
         Returns:
@@ -132,7 +142,20 @@ class Task(ABC):
         return requirements_matched
 
 
-class SuccessfulTask:
+class EmptyMonsterTask(Task):
+    def __init__(self):
+        super().__init__(symbols=[], costs=[])
+        self.complete = True
+
+
+class RandomMonsterTask(Task):
+    def __init__(self):
+        # TODO: draw a random monster on init
+        super().__init__(symbols=[], costs=[])
+        self.complete = True
+
+
+class SuccessfulTaskOption:
     def __init__(self, task: Task, dice: List[Dice]):
         self.task = task
         self.dice = dice
@@ -154,6 +177,7 @@ class AbstractAdventure(ABC, TrophyMixin):
                  event: bool = False,
                  entry_effect: Optional[AdventureEffect] = None,
                  terror_effect: Optional[AdventureEffect] = None,
+                 at_midnight_effect: Optional[AdventureEffect] = None,
                  rewards: Optional[List[AdventureEffect]] = None,
                  penalties: Optional[List[AdventureEffect]] = None,
                  name: Optional[str] = None,
@@ -165,6 +189,7 @@ class AbstractAdventure(ABC, TrophyMixin):
         self.task_completion = {task: False for task in tasks}
         self._entry_effect = entry_effect
         self._terror_effect = terror_effect
+        self._at_midnight_effect = at_midnight_effect
         self.rewards = rewards or []
         self.penalties = penalties or []
         self.name = name
@@ -192,7 +217,7 @@ class AbstractAdventure(ABC, TrophyMixin):
         return '{}(\n\t{}\n)'.format(self.__class__.__name__, '\n\t'.join([str(task) for task in self.tasks]))
 
     @abstractmethod
-    def check(self, dice_pool_roll: List[Dice], character: 'Character') -> List[SuccessfulTask]:
+    def check(self, dice_pool_roll: List[Dice], character: 'Investigator') -> List[SuccessfulTaskOption]:
         """Checks if any of the task requirements are met"""
         raise NotImplementedError
 
@@ -227,7 +252,7 @@ class Board:
     def __init__(self,
                  adventures: List[AbstractAdventure],
                  other_worlds: List[AbstractAdventure],
-                 characters: List['Character'],
+                 characters: List['Investigator'],
                  ancient_one: AncientOne,
                  decks: Dict[Type, Deck]):
         self.adventures = [None, ] * 6
@@ -241,7 +266,7 @@ class Board:
         for i, o in enumerate(other_worlds):
             self.other_words[i] = o
 
-        self.characters: List[Character] = characters
+        self.characters: List[Investigator] = characters
         self.ancient_one = ancient_one
         self.decks = decks
 
@@ -249,7 +274,7 @@ class Board:
     def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
         ancient_one = AncientOne(max_doom_tokens=12, max_elder_signs=13)
 
-        character = Character(
+        character = Investigator(
             health=5,
             sanity=5,
             items=[],
@@ -275,7 +300,7 @@ class Board:
         return board
 
 
-class Character:
+class Investigator:
     def __init__(self,
                  health: int,
                  sanity: int,

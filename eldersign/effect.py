@@ -3,7 +3,7 @@ from typing import List, Type
 import logging
 import random
 
-from eldersign.core import AdventureEffect, Character
+from eldersign.core import AdventureEffect, Investigator, InvestigatorEffect
 from eldersign.symbol import Terror
 from eldersign.item import Item
 
@@ -46,6 +46,23 @@ class ElderSignEffect(AdventureEffect):
         eldersign.ancient_one.elder_signs = max(0, eldersign.ancient_one.elder_signs-self.value)
 
 
+class InvestigatorAdventureEffect(AdventureEffect):
+    def __init__(self, effect: InvestigatorEffect):
+        self.effect = effect
+
+    def __call__(self, adventure_attempt, eldersign):
+        self.effect(adventure_attempt.character)
+
+
+class EachInvestigator(AdventureEffect):
+    def __init__(self, effect: InvestigatorEffect):
+        self.effect = effect
+
+    def __call__(self, adventure_attempt, eldersign):
+        for investigator in eldersign.characters:
+            self.effect(investigator)
+
+
 class HealthEffect(AdventureEffect):
     def __init__(self, value: int):
         self.value = value
@@ -84,6 +101,11 @@ class MonsterAppears(AdventureEffect):
         pass  # Monsters not implemented yet
 
 
+class MonsterAppearsOnEveryMonsterTask(AdventureEffect):
+    def __call__(self, adventure_attempt, eldersign):
+        pass  # Monsters not implemented yet
+
+
 class ImmediatelyFail(AdventureEffect):
     def __call__(self, adventure_attempt, eldersign):
         adventure_attempt.force_failed = True
@@ -96,6 +118,11 @@ class ItemReward(AdventureEffect):
     def __call__(self, adventure_attempt, eldersign):
         drawn_item = eldersign.decks[self.item_type].draw()
         adventure_attempt.character.items += drawn_item
+
+
+class OpenGate(AdventureEffect):
+    def __call__(self, adventure_attempt, eldersign):
+        pass
 
 
 class NotImplementedEffect(AdventureEffect):

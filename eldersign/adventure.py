@@ -1,6 +1,6 @@
 from typing import List, Any, Optional
 
-from eldersign.core import Task, SuccessfulTask, log, AbstractAdventure, AdventureEffect, Character
+from eldersign.core import Task, SuccessfulTaskOption, log, AbstractAdventure, AdventureEffect, Investigator
 from eldersign.dice import Dice, DicePool
 from eldersign.policy.clue import CluePolicy, FreezeMatchedDice
 from eldersign.symbol import Terror
@@ -18,14 +18,14 @@ class UnorderedAdventure(AbstractAdventure):
     #              name: Optional[str] = None):
     #     super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
 
-    def check(self, dice_pool_roll: List[Dice], character: Character) -> List[SuccessfulTask]:
+    def check(self, dice_pool_roll: List[Dice], character: Investigator) -> List[SuccessfulTaskOption]:
         successful_tasks = []
         for task in self.incomplete_tasks:
             log.debug("Checking requirements for {}".format(task))
             met_task_requirements = task.check_requirements(dice_pool_roll, character)
             if met_task_requirements:
                 dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
-                successful_task = SuccessfulTask(
+                successful_task = SuccessfulTaskOption(
                     task,
                     dice_used
                 )
@@ -52,7 +52,7 @@ class OrderedAdventure(AbstractAdventure):
         super().__init__(*args, **kwargs)
         self.current_task = 0
 
-    def check(self, dice_pool_roll: List[Dice], character: Character) -> List[SuccessfulTask]:
+    def check(self, dice_pool_roll: List[Dice], character: Investigator) -> List[SuccessfulTaskOption]:
         task = self.tasks[self.current_task]
 
         # There can be multiple ways to satisfy the requirements of even
@@ -61,7 +61,7 @@ class OrderedAdventure(AbstractAdventure):
 
         if met_task_requirements:
             dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
-            successful_task = SuccessfulTask(
+            successful_task = SuccessfulTaskOption(
                 task,
                 dice_used
             )
