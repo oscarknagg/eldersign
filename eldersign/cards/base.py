@@ -5,6 +5,102 @@ from eldersign import effect
 from eldersign import item
 
 
+gala_in_the_great_hall = UnorderedAdventure(
+    # Yellow dice lock
+    name="Gala in the Great Hall",
+    tasks=[
+        Task([Investigation(2), Scroll()]),
+        Task([Investigation(3)], [SanityCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.DoomTokenEffect(1),
+    rewards=[
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.Spell),
+        effect.ElderSignEffect(1),
+    ],
+    penalties=[
+        effect.DoomTokenEffect(1),
+    ],
+)
+
+please_do_not_touch_the_exhibits = UnorderedAdventure(
+    name="Medusa Exhibit",
+    tasks=[
+        Task([Terror(), Terror()], [SanityCost(1)]),
+        Task([Skull(), Skull()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.DoomTokenEffect(1),
+    rewards=[
+        effect.ElderSignEffect(2),
+    ],
+    penalties=[
+        effect.HealthEffect(-1),
+        effect.DoomTokenEffect(1),
+        effect.SanityEffect(-1),
+    ],
+)
+
+medusa_exhibit = OrderedAdventure(
+    name="Medusa Exhibit",
+    tasks=[
+        Task([Terror()], [SanityCost(1)]),
+        Task([Scroll()], [SanityCost(1)]),
+        Task([Investigation(7)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.DiscardAllTerrorDice(),
+    rewards=[
+        effect.MonsterAppears(),
+        effect.ItemReward(item.Spell),
+        effect.ItemReward(item.CommonItem),
+        effect.ItemReward(item.Clue),
+    ],
+    penalties=[
+        effect.SanityEffect(-2),
+    ],
+)
+
+the_guided_tour = OrderedAdventure(
+    name="The Guided Tour",
+    tasks=[
+        Task([Investigation(2)]),
+        Task([Investigation(4)]),
+        Task([Scroll()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.CommonItem),
+        effect.ItemReward(item.Clue),
+    ],
+    penalties=[
+        effect.SanityEffect(-1),
+        effect.HealthEffect(-1),
+    ],
+)
+
+you_become_that_which_you_fear_most = UnorderedAdventure(
+    name="You Become that which you Fear Most",
+    tasks=[
+        EmptyMonsterTask(),
+        Task([Terror(), Terror(), Terror()]),
+    ],
+    trophy_value=2,
+    at_midnight_effect=effect.MonsterAppears(),
+    rewards=[
+        effect.MonsterAppears(),
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.UniqueItem),
+        effect.ElderSignEffect(1),
+    ],
+    penalties=[
+        effect.SanityEffect(-1),
+    ],
+)
+
 the_curator = UnorderedAdventure(
     name="The Curator",
     tasks=[

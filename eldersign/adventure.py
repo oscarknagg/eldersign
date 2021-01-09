@@ -1,6 +1,6 @@
 from typing import List, Any, Optional
 
-from eldersign.core import Task, SuccessfulTaskOption, log, AbstractAdventure, AdventureEffect, Investigator
+from eldersign.core import Task, SuccessfulTaskOption, log, AbstractAdventure, AdventureEffect, Investigator, InvestigatorEffect
 from eldersign.dice import Dice, DicePool
 from eldersign.policy.clue import CluePolicy, FreezeMatchedDice
 from eldersign.symbol import Terror
@@ -99,6 +99,20 @@ class AdventureAttempt:
                 log.debug("Completing task {} due to membership".format(task))
                 self.adventure.complete_task(task)
 
+    def apply_consequences(self, succeeded: bool):
+        if succeeded:
+            consequences = self.adventure.rewards
+        else:
+            consequences = self.adventure.penalties
+
+        for effect in consequences:
+            if isinstance(effect, InvestigatorEffect):
+                effect.apply_effect(self.character)
+            elif isinstance(effect, AdventureEffect):
+                effect.apply_effect(self, self.adventure.board)
+            else:
+                raise TypeError("{} of type {} is not expected.".format(effect, type(effect)))
+
     def attempt(self) -> bool:
         """True if the adventure is completed."""
         log.debug("Attempting adventure:\n{}".format(self.adventure))
@@ -128,7 +142,6 @@ class AdventureAttempt:
                     cost.apply(self.character)
             else:
                 # Handle failures
-
                 # Apply clue policy
                 if self.num_clues > 0:
                     # Retry using a clue to re-roll
@@ -150,9 +163,12 @@ class AdventureAttempt:
             ))
 
             if self.force_failed:
+                self.apply_consequences(False)
                 return False
 
             if self.adventure.is_complete:
+                self.apply_consequences(True)
                 return True
 
+        self.apply_consequences(False)
         return False

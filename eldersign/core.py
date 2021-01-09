@@ -57,10 +57,6 @@ class InvestigatorEffect(AbstractEffect):
     def apply_effect(self, investigator: 'Investigator'):
         raise NotImplementedError
 
-    @abstractmethod
-    def check_requirements(self, investigator: 'Investigator') -> bool:
-        raise NotImplementedError
-
 
 class Cost(ABC):
     @abstractmethod
@@ -106,13 +102,21 @@ class Task(ABC):
     def __init__(self,
                  symbols: List[Symbol],
                  costs: Optional[List[Cost]] = None,
-                 membership: Optional[str] = None):
+                 membership: Optional[str] = None,
+                 monster_slot: Optional[int] = None):
         self._symbols: List[Symbol] = symbols
         self.costs: List[Cost] = costs or []
         assert membership in ('silver_twilight', 'sheldon_gang', None)
         self.membership = membership
 
         self.complete = False
+
+        # n == None means not a monster task
+        # n == 0 means replacement task
+        # n >= 1 or more means a partial monster task i.e. the first n symbols are
+        # not convered by the monster
+        assert monster_slot < len(self)
+        self.monster_slot = monster_slot
 
     def __repr__(self):
         if self.membership:
@@ -193,8 +197,8 @@ class AbstractAdventure(ABC, TrophyMixin):
                  tasks: List[Task],
                  trophy_value: int,
                  event: bool = False,
-                 entry_effect: Optional[AdventureEffect] = None,
-                 terror_effect: Optional[AdventureEffect] = None,
+                 entry_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
+                 terror_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
                  at_midnight_effect: Optional[AdventureEffect] = None,
                  rewards: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
                  penalties: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
@@ -331,6 +335,8 @@ class Investigator:
         self.membership = membership
         self.items = items
         self.trophies = trophies
+
+        self.cursed = False
 
     def __repr__(self):
         return 'Character(health={},sanity={})'.format(self.health, self.sanity)

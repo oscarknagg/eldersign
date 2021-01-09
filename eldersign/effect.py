@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Type
+from typing import List, Type, TypeVar
 import logging
 import random
 
@@ -9,6 +9,7 @@ from eldersign.item import Item
 
 
 log = logging.getLogger(__name__)
+T = TypeVar('T')
 
 
 class EffectChoice(AbstractEffect):
@@ -31,6 +32,19 @@ class InvestigatorEffectChoice(InvestigatorEffect):
         available_effects = [effect for effect in self.effects if self.check_requirements(investigator)]
         effect = random.choice(available_effects)
         effect(investigator)
+
+
+def union_effects(effects: List[T]) -> T:
+    """I don't know if this will work but its cool."""
+    class _UnionEffect(type(effects[0])):
+        def __init__(self, _effects: List[T]):
+            self._effects = _effects
+
+        def apply_effect(self, *args, **kwargs):
+            for effect in self._effects:
+                effect(*args, **kwargs)
+
+    return _UnionEffect(_effects=effects)
 
 
 class UnionEffect(AbstractEffect):
@@ -89,6 +103,11 @@ class SanityEffect(InvestigatorEffect):
 
     def apply_effect(self, investigator: Investigator):
         investigator.sanity -= self.value
+
+
+class Curse(InvestigatorEffect):
+    def apply_effect(self, investigator: 'Investigator'):
+        investigator.cursed = True
 
 
 class DiscardAllTerrorDice(AdventureEffect):
