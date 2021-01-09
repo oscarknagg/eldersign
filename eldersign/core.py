@@ -1,13 +1,35 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Any, Type, Dict
+from collections import deque
 import logging
+import random
 
 from eldersign.dice import Dice, DicePool
+from eldersign.item import Item
 from eldersign.symbol import Symbol
-from eldersign.character import Character
+from eldersign import item
 
 
 log = logging.getLogger(__name__)
+
+
+class TrophyMixin:
+    def __init__(self, tropy_value: int):
+        self.trophy_value = tropy_value
+
+
+class Deck:
+    def __init__(self, items: list):
+        deck_type = type(items[0])
+        assert all(isinstance(i, deck_type) for i in items), "A deck must contain only one type."
+        self.deck = deque(items)
+
+    def shuffle(self):
+        random.shuffle(self.deck)
+
+    def draw(self) -> Any:
+        out = self.deck.pop()
+        return out
 
 
 class AdventureEffect(ABC):
@@ -18,11 +40,11 @@ class AdventureEffect(ABC):
 
 class Cost(ABC):
     @abstractmethod
-    def check(self, character: Character) -> bool:
+    def check(self, character: 'Character') -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def apply(self, character: Character):
+    def apply(self, character: 'Character'):
         raise NotImplementedError
 
 
@@ -33,10 +55,10 @@ class HealthCost(Cost):
     def __repr__(self):
         return 'Health({})'.format(self.value)
 
-    def check(self, character: Character):
+    def check(self, character: 'Character'):
         return character.health > self.value
 
-    def apply(self, character: Character):
+    def apply(self, character: 'Character'):
         log.debug("Applying {} to {}".format(self, character))
         character.health -= self.value
 
@@ -48,10 +70,10 @@ class SanityCost(Cost):
     def __repr__(self):
         return 'Sanity({})'.format(self.value)
 
-    def check(self, character: Character):
+    def check(self, character: 'Character'):
         return character.sanity > self.value
 
-    def apply(self, character: Character):
+    def apply(self, character: 'Character'):
         log.debug("Applying {} to {}".format(self, character))
         character.sanity -= self.value
 
@@ -77,7 +99,7 @@ class Task(ABC):
     def __len__(self):
         return len(self.symbols)
 
-    def check_requirements(self, dice: List[Dice], character: Character) -> Optional[List[Tuple[Symbol, List[Dice]]]]:
+    def check_requirements(self, dice: List[Dice], character: 'Character') -> Optional[List[Tuple[Symbol, List[Dice]]]]:
         """Checks whether the requirements of this task are met.
 
         Returns:
@@ -125,21 +147,28 @@ class CluePolicy(ABC):
         raise NotImplementedError
 
 
-class AbstractAdventure(ABC):
+class AbstractAdventure(ABC, TrophyMixin):
     def __init__(self,
                  tasks: List[Task],
                  trophy_value: int,
                  event: bool = False,
                  entry_effect: Optional[AdventureEffect] = None,
                  terror_effect: Optional[AdventureEffect] = None,
+                 rewards: Optional[List[AdventureEffect]] = None,
+                 penalties: Optional[List[AdventureEffect]] = None,
+                 name: Optional[str] = None,
                  board: Optional['Board'] = None):
+        TrophyMixin.__init__(self, tropy_value=trophy_value)
         assert all(isinstance(task, Task) for task in tasks)
         self.tasks = tasks
-        self.trophy_value = trophy_value
         self.event = event
         self.task_completion = {task: False for task in tasks}
         self._entry_effect = entry_effect
         self._terror_effect = terror_effect
+        self.rewards = rewards or []
+        self.penalties = penalties or []
+        self.name = name
+
         self.board = board
 
     @property
@@ -163,7 +192,7 @@ class AbstractAdventure(ABC):
         return '{}(\n\t{}\n)'.format(self.__class__.__name__, '\n\t'.join([str(task) for task in self.tasks]))
 
     @abstractmethod
-    def check(self, dice_pool_roll: List[Dice], character: Character) -> List[SuccessfulTask]:
+    def check(self, dice_pool_roll: List[Dice], character: 'Character') -> List[SuccessfulTask]:
         """Checks if any of the task requirements are met"""
         raise NotImplementedError
 
@@ -198,8 +227,9 @@ class Board:
     def __init__(self,
                  adventures: List[AbstractAdventure],
                  other_worlds: List[AbstractAdventure],
-                 characters: List[Character],
-                 ancient_one: AncientOne):
+                 characters: List['Character'],
+                 ancient_one: AncientOne,
+                 decks: Dict[Type, Deck]):
         self.adventures = [None, ] * 6
         assert len(adventures) <= len(self.adventures)
         for i, a in enumerate(adventures):
@@ -213,3 +243,51 @@ class Board:
 
         self.characters: List[Character] = characters
         self.ancient_one = ancient_one
+        self.decks = decks
+
+    @classmethod
+    def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
+        ancient_one = AncientOne(max_doom_tokens=12, max_elder_signs=13)
+
+        character = Character(
+            health=5,
+            sanity=5,
+            items=[],
+            trophies=[]
+        )
+
+        decks = {}
+        for item_type in [item.CommonItem, item.UniqueItem, item.Spell, item.Ally]:
+            items = []
+            for i in range(10):
+                items.append(item_type())
+
+            decks[item_type] = Deck(items)
+
+        board = Board(
+            adventures=[adventure],
+            other_worlds=[],
+            characters=[character],
+            ancient_one=ancient_one,
+            decks=decks
+        )
+
+        return board
+
+
+class Character:
+    def __init__(self,
+                 health: int,
+                 sanity: int,
+                 membership: Optional[str] = None,
+                 items: List[Item] = [],
+                 trophies: List[TrophyMixin] = []):
+        self.health = health
+        self.sanity = sanity
+        assert membership in ('silver_twilight', 'sheldon_gang', None)
+        self.membership = membership
+        self.items = items
+        self.trophies = trophies
+
+    def __repr__(self):
+        return 'Character(health={},sanity={})'.format(self.health, self.sanity)

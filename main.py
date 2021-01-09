@@ -7,8 +7,7 @@ from eldersign.adventure import AdventureAttempt
 from eldersign.dice import GreenDice, DicePool, RedDice, YellowDice
 from eldersign.policy.clue import FreezeMatchedDice, NaiveCluePolicy
 from eldersign import cards
-from eldersign.character import Character
-from eldersign.core import Board, AncientOne
+from eldersign.core import Board, AncientOne, Character
 
 log = logging.getLogger()
 log.setLevel('INFO')

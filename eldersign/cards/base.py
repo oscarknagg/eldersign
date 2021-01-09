@@ -10,7 +10,7 @@ the_koi_pond = UnorderedAdventure(
         Task([Terror(), Skull(), Skull()]),
     ],
     trophy_value=2,
-    # terror_effect=effect.ImmediatelyFail()
+    terror_effect=effect.ImmediatelyFail()
 )
 
 remains_of_the_high_priest = UnorderedAdventure(

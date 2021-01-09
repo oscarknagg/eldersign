@@ -1,20 +1,22 @@
 from typing import List, Any, Optional
 
-from eldersign.core import Task, SuccessfulTask, log, AbstractAdventure, AdventureEffect
+from eldersign.core import Task, SuccessfulTask, log, AbstractAdventure, AdventureEffect, Character
 from eldersign.dice import Dice, DicePool
 from eldersign.policy.clue import CluePolicy, FreezeMatchedDice
-from eldersign.character import Character
 from eldersign.symbol import Terror
 
 
 class UnorderedAdventure(AbstractAdventure):
-    def __init__(self,
-                 tasks: List[Task],
-                 trophy_value: int,
-                 event: bool = False,
-                 entry_effect: Optional[AdventureEffect] = None,
-                 terror_effect: Optional[AdventureEffect] = None):
-        super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
+    # def __init__(self,
+    #              tasks: List[Task],
+    #              trophy_value: int,
+    #              event: bool = False,
+    #              entry_effect: Optional[AdventureEffect] = None,
+    #              terror_effect: Optional[AdventureEffect] = None,
+    #              rewards: Optional[List[AdventureEffect]] = None,
+    #              penalties: Optional[List[AdventureEffect]] = None,
+    #              name: Optional[str] = None):
+    #     super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
 
     def check(self, dice_pool_roll: List[Dice], character: Character) -> List[SuccessfulTask]:
         successful_tasks = []
@@ -37,13 +39,17 @@ class UnorderedAdventure(AbstractAdventure):
 
 
 class OrderedAdventure(AbstractAdventure):
-    def __init__(self,
-                 tasks: List[Task],
-                 trophy_value: int,
-                 event: bool = False,
-                 entry_effect: Optional[AdventureEffect] = None,
-                 terror_effect: Optional[AdventureEffect] = None):
-        super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
+    # def __init__(self,
+    #              tasks: List[Task],
+    #              trophy_value: int,
+    #              event: bool = False,
+    #              entry_effect: Optional[AdventureEffect] = None,
+    #              terror_effect: Optional[AdventureEffect] = None):
+    #     super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
+    #     self.current_task = 0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.current_task = 0
 
     def check(self, dice_pool_roll: List[Dice], character: Character) -> List[SuccessfulTask]:
