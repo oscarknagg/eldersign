@@ -5,6 +5,99 @@ from eldersign import effect
 from eldersign import item
 
 
+the_hidden_temple = OrderedAdventure(
+    name="The Hidden Temple",
+    tasks=[
+        Task([Investigation(5)]),
+        Task([Investigation(3), Scroll(), Skull()]),
+    ],
+    trophy_value=3,
+    entry_effect=effect.AddDoomToken(1),
+    rewards=[
+        effect.OpenGate(),
+        effect.OpenGate(),
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.UniqueItem),
+    ],
+    penalties=[
+        effect.AddDoomToken(1),
+    ],
+)
+
+slithering_shadows = UnorderedAdventure(
+    name="Slithering Shadows",
+    tasks=[
+        Task([Investigation(5)]),
+        Task([Skull(), Skull(), Skull()]),
+    ],
+    trophy_value=2,
+    at_midnight_effect=effect.ThreeDoomsIfAnyMonster(),
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Spell),
+        effect.MonsterAppears(),
+    ],
+    penalties=[
+        effect.AddHealth(-1),
+        effect.AddSanity(-1),
+    ],
+)
+
+in_the_stacks = UnorderedAdventure(
+    name="In the Stacks",
+    tasks=[
+        Task([Skull(), Terror()]),
+        Task([Terror()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.MonsterAppears(),
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.CommonItem, 2),
+    ],
+    penalties=[
+        effect.AddHealth(-1),
+        effect.AddSanity(-1),
+    ],
+)
+
+strange_robberies = UnorderedAdventure(
+    name="Strange Robberies",
+    tasks=[
+        Task([Investigation(4)]),
+        Task([Skull(), Scroll(), Skull()]),
+    ],
+    trophy_value=3,
+    entry_effect=effect.union_effects([
+        effect.AddHealth(-1),
+        effect.AddSanity(-1),
+    ]),
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.AddElderSign(1),
+    ],
+    penalties=[
+        effect.AddDoomToken(1),
+    ],
+)
+
+the_director_s_safe = UnorderedAdventure(
+    name="The Director's Safe",
+    tasks=[
+        Task([Investigation(2), Skull()]),
+        Task([Skull(), Skull()]),
+    ],
+    trophy_value=1,
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.NotImplementedEffect("Draw the top 2 cards of the Adventure deck and claim them as trophies as well")
+    ],
+    penalties=[
+        effect.AddHealth(-2),
+    ],
+)
+
 bloody_footprints = UnorderedAdventure(
     name="Bloody Footprints",
     tasks=[
@@ -13,15 +106,15 @@ bloody_footprints = UnorderedAdventure(
         Task([Terror()]),
     ],
     trophy_value=1,
-    terror_effect=effect.HealthEffect(-1),
+    terror_effect=effect.AddHealth(-1),
     rewards=[
-        effect.ElderSignEffect(1),
-        effect.ItemReward(item.Clue),
-        effect.ItemReward(item.Clue),
+        effect.AddElderSign(1),
+        effect.AddItem(item.Clue),
+        effect.AddItem(item.Clue),
         effect.MonsterAppears(),
     ],
     penalties=[
-        effect.SanityEffect(-2),
+        effect.AddSanity(-2),
     ],
 )
 
@@ -32,14 +125,14 @@ under_construction = UnorderedAdventure(
         Task([Scroll(), Scroll()]),
     ],
     trophy_value=1,
-    terror_effect=effect.HealthEffect(-1),
+    terror_effect=effect.AddHealth(-1),
     rewards=[
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.Clue),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Clue),
     ],
     penalties=[
-        effect.DoomTokenEffect(1),
-        effect.SanityEffect(-1),
+        effect.AddDoomToken(1),
+        effect.AddSanity(-1),
     ],
 )
 
@@ -52,13 +145,13 @@ dreaming_of_a_stranger = OrderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.UniqueItem),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.UniqueItem),
         effect.OpenGate(),
-        effect.ItemReward(item.Ally),
+        effect.AddItem(item.Ally),
     ],
     penalties=[
-        effect.DoomTokenEffect(1),
+        effect.AddDoomToken(1),
     ],
 )
 
@@ -71,12 +164,12 @@ repugnant_tome = OrderedAdventure(
     trophy_value=2,
     terror_effect=effect.NotImplementedEffect("Discard 1 spell or be devoured."),
     rewards=[
-        effect.ElderSignEffect(1),
+        effect.AddElderSign(1),
         effect.OpenGate(),
         effect.MonsterAppears(),
     ],
     penalties=[
-        effect.SanityEffect(-2),
+        effect.AddSanity(-2),
     ],
 )
 
@@ -89,12 +182,12 @@ the_door_is_ajar = UnorderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ElderSignEffect(1),
+        effect.AddElderSign(1),
         effect.OpenGate(),
         effect.MonsterAppears(),
     ],
     penalties=[
-        effect.SanityEffect(-1),
+        effect.AddSanity(-1),
     ],
 )
 
@@ -110,16 +203,16 @@ too_quiet = UnorderedAdventure(
     #     effect.MonsterAppears()
     # ]),
     at_midnight_effect=effect.union_effects([
-        effect.DoomTokenEffect(1),
+        effect.AddDoomToken(1),
         effect.MonsterAppears()
     ]),
     rewards=[
-        effect.ElderSignEffect(1),
-        effect.ItemReward(item.UniqueItem),
+        effect.AddElderSign(1),
+        effect.AddItem(item.UniqueItem),
     ],
     penalties=[
-        effect.HealthEffect(-1),
-        effect.DoomTokenEffect(1),
+        effect.AddHealth(-1),
+        effect.AddDoomToken(1),
     ],
 )
 
@@ -133,10 +226,10 @@ prized_display = UnorderedAdventure(
     trophy_value=1,
     rewards=[
         effect.MonsterAppears(),
-        effect.ItemReward(item.UniqueItem),
+        effect.AddItem(item.UniqueItem),
     ],
     penalties=[
-        effect.HealthEffect(-1)
+        effect.AddHealth(-1)
     ],
 )
 
@@ -148,11 +241,11 @@ wicked_old_man = UnorderedAdventure(
     ],
     trophy_value=3,
     # terror_effect=effect.UnionEffect([effect.SanityEffect(-1), effect.HealthEffect(-1)]),
-    terror_effect=effect.union_effects([effect.SanityEffect(-1), effect.HealthEffect(-1)]),
+    terror_effect=effect.union_effects([effect.AddSanity(-1), effect.AddHealth(-1)]),
     rewards=[
-        effect.ElderSignEffect(1),
-        effect.ItemReward(item.Clue),
-        effect.ItemReward(item.Clue),
+        effect.AddElderSign(1),
+        effect.AddItem(item.Clue),
+        effect.AddItem(item.Clue),
     ],
     penalties=[
         effect.Curse()
@@ -167,13 +260,13 @@ the_true_history = UnorderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ElderSignEffect(1),
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.Spell),
+        effect.AddElderSign(1),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Spell),
     ],
     penalties=[
-        effect.DoomTokenEffect(1)
+        effect.AddDoomToken(1)
     ],
 )
 
@@ -186,13 +279,13 @@ visiting_antiquarian = UnorderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ItemReward(item.UniqueItem),
-        effect.ItemReward(item.UniqueItem),
-        effect.ItemReward(item.Spell),
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.Spell),
     ],
     penalties=[
-        effect.HealthEffect(-1),
-        effect.SanityEffect(-2)
+        effect.AddHealth(-1),
+        effect.AddSanity(-2)
     ],
 )
 
@@ -207,14 +300,14 @@ walking_the_ledge = OrderedAdventure(
     terror_effect=effect.MonsterAppearsOnEveryMonsterTask(),
     at_midnight_effect=effect.NotImplementedEffect("Discard this adventure and do not replace it"),
     rewards=[
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.Clue),
-        effect.ElderSignEffect(1),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Clue),
+        effect.AddElderSign(1),
     ],
     penalties=[
-        effect.HealthEffect(-2),
-        effect.SanityEffect(-1)
+        effect.AddHealth(-2),
+        effect.AddSanity(-1)
     ],
 )
 
@@ -227,12 +320,12 @@ it_s_quiet = UnorderedAdventure(
     terror_effect=effect.MonsterAppearsOnEveryMonsterTask(),
     at_midnight_effect=effect.NotImplementedEffect("Discard this adventure and do not replace it"),
     rewards=[
-        effect.ItemReward(item.Clue),
-        effect.ItemReward(item.Clue),
-        effect.ElderSignEffect(1),
+        effect.AddItem(item.Clue),
+        effect.AddItem(item.Clue),
+        effect.AddElderSign(1),
     ],
     penalties=[
-        effect.DoomTokenEffect(1)
+        effect.AddDoomToken(1)
     ],
 )
 
@@ -246,12 +339,12 @@ sudden_attack = UnorderedAdventure(
     trophy_value=1,
     terror_effect=effect.MonsterAppearsOnEveryMonsterTask(),
     rewards=[
-        effect.ItemReward(item.UniqueItem),
-        effect.ItemReward(item.CommonItem),
-        effect.ElderSignEffect(1),
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.CommonItem),
+        effect.AddElderSign(1),
     ],
     penalties=[
-        effect.HealthEffect(-2)
+        effect.AddHealth(-2)
     ],
 )
 
@@ -264,13 +357,13 @@ balancing_mind_and_body = UnorderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ItemReward(item.CommonItem),
-        effect.ItemReward(item.Spell),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Spell),
     ],
     penalties=[
-        effect.HealthEffect(-1)
+        effect.AddHealth(-1)
     ],
-    terror_effect=effect.SanityEffect(-1)
+    terror_effect=effect.AddSanity(-1)
 )
 
 vision_of_demise = UnorderedAdventure(
@@ -281,13 +374,13 @@ vision_of_demise = UnorderedAdventure(
     ],
     trophy_value=2,
     rewards=[
-        effect.ElderSignEffect(1),
-        effect.ItemReward(item.Spell),
+        effect.AddElderSign(1),
+        effect.AddItem(item.Spell),
         effect.NotImplementedEffect("After successfully resolving this adventure, look at the top 3 cards of the "
                                     "mythos deck. Discard 1 and return the other 2 to the top of the deck in any order.")
 
     ],
     penalties=[
-        effect.SanityEffect(-1)
+        effect.AddSanity(-1)
     ]
 )

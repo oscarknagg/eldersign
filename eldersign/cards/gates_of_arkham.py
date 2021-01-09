@@ -1,7 +1,7 @@
 from eldersign.core import Task, HealthCost, SanityCost
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
-from eldersign.effect import UnionEffect, HealthEffect, SanityEffect, DoomTokenEffect
+from eldersign.effect import UnionEffect, AddHealth, AddSanity, AddDoomToken
 
 _monster = Task([Skull(), Investigation(1)])
 
@@ -29,7 +29,7 @@ police_raid = OrderedAdventure(
         Task([Investigation(3), Skull(), Skull()], [HealthCost(1)]),
     ],
     trophy_value=2,
-    entry_effect=HealthEffect(1)
+    entry_effect=AddHealth(1)
 )
 
 the_machine = OrderedAdventure(
@@ -220,7 +220,7 @@ death_at_the_docks = UnorderedAdventure(
     ],
     trophy_value=1,
     event=True,
-    terror_effect=UnionEffect([HealthEffect(1), SanityEffect(1)])
+    terror_effect=UnionEffect([AddHealth(1), AddSanity(1)])
 )
 
 private_meetings = UnorderedAdventure(
@@ -229,7 +229,7 @@ private_meetings = UnorderedAdventure(
         Task([Investigation(3), Scroll(), Scroll()]),
     ],
     trophy_value=2,
-    entry_effect=DoomTokenEffect(1)
+    entry_effect=AddDoomToken(1)
 )
 
 ink_blots = UnorderedAdventure(
@@ -255,7 +255,7 @@ psychiatric_assistance = UnorderedAdventure(
         Task([Investigation(3)]),
     ],
     trophy_value=1,
-    terror_effect=SanityEffect(1)
+    terror_effect=AddSanity(1)
 )
 
 prayers_for_the_lost = UnorderedAdventure(

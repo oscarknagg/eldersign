@@ -56,7 +56,7 @@ class UnionEffect(AbstractEffect):
             effect(*args, **kwargs)
 
 
-class DoomTokenEffect(AdventureEffect):
+class AddDoomToken(AdventureEffect):
     def __init__(self, value: int):
         self.value = value
 
@@ -64,7 +64,7 @@ class DoomTokenEffect(AdventureEffect):
         eldersign.ancient_one.doom_tokens = max(0, eldersign.ancient_one.doom_tokens-self.value)
 
 
-class ElderSignEffect(AdventureEffect):
+class AddElderSign(AdventureEffect):
     def __init__(self, value: int):
         self.value = value
 
@@ -89,7 +89,7 @@ class EachInvestigator(AdventureEffect):
             self.effect(investigator)
 
 
-class HealthEffect(InvestigatorEffect):
+class AddHealth(InvestigatorEffect):
     def __init__(self, value: int):
         self.value = value
 
@@ -97,7 +97,7 @@ class HealthEffect(InvestigatorEffect):
         investigator.health -= self.value
 
 
-class SanityEffect(InvestigatorEffect):
+class AddSanity(InvestigatorEffect):
     def __init__(self, value: int):
         self.value = value
 
@@ -132,6 +132,13 @@ class MonsterAppears(AdventureEffect):
         pass  # Monsters not implemented yet
 
 
+class ThreeDoomsIfAnyMonster(AdventureEffect):
+    def apply_effect(self, adventure_attempt, eldersign):
+        # approximate with +1 doom
+        # TODO: implement
+        eldersign.ancient_one.doom_tokens += 1
+
+
 class MonsterAppearsOnEveryMonsterTask(AdventureEffect):
     def apply_effect(self, adventure_attempt, eldersign):
         pass  # Monsters not implemented yet
@@ -142,13 +149,27 @@ class ImmediatelyFail(AdventureEffect):
         adventure_attempt.force_failed = True
 
 
-class ItemReward(AdventureEffect):
-    def __init__(self, item_type: Type[Item]):
+class AddItem(AdventureEffect):
+    def __init__(self, item_type: Type[Item], amount: int = 1):
         self.item_type = item_type
+        assert amount != 0
+        self.amount = 1
 
     def apply_effect(self, adventure_attempt, eldersign):
-        drawn_item = eldersign.decks[self.item_type].draw()
-        adventure_attempt.character.items += drawn_item
+        if self.amount > 0:
+            for i in range(self.amount):
+                drawn_item = eldersign.decks[self.item_type].draw()
+                adventure_attempt.character.items += drawn_item
+        else:
+            to_remove = []
+            for item in adventure_attempt.character.items:
+                if isinstance(item, self.item_type):
+                    to_remove.append(item)
+
+            for i in to_remove:
+                adventure_attempt.character.items.remove(i)
+
+            log.debug("Removed {} items from {}".format(len(to_remove), adventure_attempt.character))
 
 
 class OpenGate(AdventureEffect):
