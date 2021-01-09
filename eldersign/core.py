@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Optional, Any, Type, Dict
+from typing import List, Tuple, Optional, Any, Type, Dict, Union
 from collections import deque
 import logging
 import random
@@ -32,15 +32,33 @@ class Deck:
         return out
 
 
-class AdventureEffect(ABC):
+class AbstractEffect(ABC):
     @abstractmethod
-    def __call__(self, adventure_atttempt, eldersign):
+    def apply_effect(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def __call__(self, *args, **kwargs):
+        if self.check_requirements(*args, **kwargs):
+            self.apply_effect(*args, **kwargs)
+
+    def check_requirements(self, *args, **kwargs) -> bool:
+        """Defaults to no requirements"""
+        return True
+
+
+class AdventureEffect(AbstractEffect):
+    @abstractmethod
+    def apply_effect(self, adventure_atttempt, eldersign: 'Board'):
         raise NotImplementedError
 
 
-class InvestigatorEffect(ABC):
+class InvestigatorEffect(AbstractEffect):
     @abstractmethod
-    def __call__(self, investigator: 'Investigator'):
+    def apply_effect(self, investigator: 'Investigator'):
+        raise NotImplementedError
+
+    @abstractmethod
+    def check_requirements(self, investigator: 'Investigator') -> bool:
         raise NotImplementedError
 
 
@@ -178,8 +196,8 @@ class AbstractAdventure(ABC, TrophyMixin):
                  entry_effect: Optional[AdventureEffect] = None,
                  terror_effect: Optional[AdventureEffect] = None,
                  at_midnight_effect: Optional[AdventureEffect] = None,
-                 rewards: Optional[List[AdventureEffect]] = None,
-                 penalties: Optional[List[AdventureEffect]] = None,
+                 rewards: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
+                 penalties: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
                  name: Optional[str] = None,
                  board: Optional['Board'] = None):
         TrophyMixin.__init__(self, tropy_value=trophy_value)

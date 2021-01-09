@@ -5,6 +5,32 @@ from eldersign import effect
 from eldersign import item
 
 
+the_curator = UnorderedAdventure(
+    name="The Curator",
+    tasks=[
+        Task([Scroll(), Scroll(), Scroll()]),
+        Task([Scroll(), Investigation(2)]),
+    ],
+    trophy_value=2,
+    at_midnight_effect=effect.EachInvestigator(
+        effect.InvestigatorEffectChoice([
+            effect.SpendTrophies(2),
+            effect.UnionEffect([
+                effect.HealthEffect(-1),
+                effect.SanityEffect(-1)
+            ])
+        ])
+    ),
+    rewards=[
+        effect.ItemReward(item.Clue),
+        effect.ItemReward(item.CommonItem),
+        effect.ElderSignEffect(12),
+    ],
+    penalties=[
+        effect.SanityEffect(-2),
+    ],
+)
+
 the_hedge_maze = UnorderedAdventure(
     name="The Hedge Maze",
     tasks=[
@@ -217,14 +243,6 @@ remains_of_the_high_priest = UnorderedAdventure(
     penalties=[
         effect.HealthEffect(-1)
     ]
-)
-
-the_curator = UnorderedAdventure(
-    tasks=[
-        Task([Scroll(), Scroll(), Scroll()]),
-        Task([Scroll(), Investigation(3)]),
-    ],
-    trophy_value=2
 )
 
 blood_on_the_floor = OrderedAdventure(
