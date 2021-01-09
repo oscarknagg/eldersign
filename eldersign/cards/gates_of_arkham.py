@@ -5,6 +5,74 @@ from eldersign.effect import UnionEffect, HealthEffect, SanityEffect, DoomTokenE
 
 _monster = Task([Skull(), Investigation(1)])
 
+the_forbidden_library = OrderedAdventure(
+    tasks=[
+        Task([Investigation(3), Terror(), Terror()]),
+        Task([Scroll(), Scroll()]),
+    ],
+    trophy_value=3,
+    # entry_effect=HealthEffect(1)
+)
+
+blood_sacrifice = OrderedAdventure(
+    tasks=[
+        Task([Terror(), Skull()]),
+        Task([Skull(), Skull()]),
+    ],
+    trophy_value=2,
+    # entry_effect=HealthEffect(1)
+)
+
+police_raid = OrderedAdventure(
+    tasks=[
+        # Task([Investigation(2), Skull()]),
+        Task([Investigation(3), Skull(), Skull()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    entry_effect=HealthEffect(1)
+)
+
+the_machine = OrderedAdventure(
+    tasks=[
+        Task([Investigation(2), SymbolUnion([Scroll(), Terror()]), SymbolUnion([Scroll(), Terror()])]),
+        Task([Investigation(2), SymbolUnion([Scroll(), Skull()])]),
+    ],
+    trophy_value=2,
+)
+
+necromantic_rites = OrderedAdventure(
+    tasks=[
+        Task([Terror(), Skull()], [SanityCost(1)]),
+        Task([SymbolUnion([Scroll(), Skull()])]),
+        # Task([Scroll(), Skull()]),
+    ],
+    trophy_value=2,
+)
+
+sanctification = OrderedAdventure(
+    tasks=[
+        Task([Scroll()]),
+        Task([Scroll(), Scroll()]),
+    ],
+    trophy_value=1,
+)
+
+open_graves = OrderedAdventure(
+    tasks=[
+        # Monster slot
+        Task([Investigation(2), Terror(), Skull(), Scroll]),
+    ],
+    trophy_value=2,
+)
+
+late_arrivals = OrderedAdventure(
+    tasks=[
+        Task([Investigation(3)]),
+        Task([Investigation(3), Investigation(3)]),
+    ],
+    trophy_value=1,
+)
+
 the_psychic_skull = OrderedAdventure(
     tasks=[
         Task([Scroll(), Scroll()]),
@@ -160,7 +228,8 @@ private_meetings = UnorderedAdventure(
         Task([Investigation(2)], membership='silver_twilight'),
         Task([Investigation(3), Scroll(), Scroll()]),
     ],
-    trophy_value=2
+    trophy_value=2,
+    entry_effect=DoomTokenEffect(1)
 )
 
 ink_blots = UnorderedAdventure(
@@ -185,7 +254,8 @@ psychiatric_assistance = UnorderedAdventure(
         Task([Investigation(1), Investigation(2)]),
         Task([Investigation(3)]),
     ],
-    trophy_value=1
+    trophy_value=1,
+    terror_effect=SanityEffect(1)
 )
 
 prayers_for_the_lost = UnorderedAdventure(

@@ -182,6 +182,7 @@ class AbstractAdventure(ABC):
     def terror_effect(self, adventure_attempt, eldersign: 'Board'):
         """Override in subclasses"""
         if self._terror_effect:
+            log.debug("Triggered terror effect: {}".format(self._terror_effect.__class__.__name__))
             self._terror_effect(adventure_attempt, eldersign)
 
 

@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 from eldersign.symbol import Symbol, Investigation, Terror, Skull, Scroll, Wildcard
 
@@ -94,7 +94,10 @@ class DicePool:
                 # Then red
                 return self.dice.pop(i)
 
-    def remove(self, dice: List[Dice]):
+    def remove(self, dice: Union[Dice, List[Dice]]):
+        if not isinstance(dice, list):
+            dice = [dice]
+
         for d in dice:
             self.dice.remove(d)
 

@@ -1,7 +1,43 @@
 from eldersign.core import Task
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
+from eldersign import effect
 
+
+the_koi_pond = UnorderedAdventure(
+    tasks=[
+        Task([Terror()]),
+        Task([Terror(), Skull(), Skull()]),
+    ],
+    trophy_value=2,
+    # terror_effect=effect.ImmediatelyFail()
+)
+
+remains_of_the_high_priest = UnorderedAdventure(
+    tasks=[
+        Task([Skull()]),
+        Task([Scroll(), Investigation(6)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.DiscardAllTerrorDice()
+)
+
+the_curator = UnorderedAdventure(
+    tasks=[
+        Task([Scroll(), Scroll(), Scroll()]),
+        Task([Scroll(), Investigation(3)]),
+    ],
+    trophy_value=2
+)
+
+blood_on_the_floor = OrderedAdventure(
+    tasks=[
+        Task([Investigation(2)]),
+        Task([Investigation(3)]),
+        Task([Terror(), Skull()]),
+    ],
+    trophy_value=2
+)
 
 the_dreamlands = UnorderedAdventure(
     tasks=[
