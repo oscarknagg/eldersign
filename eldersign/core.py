@@ -23,6 +23,8 @@ class Deck:
         deck_type = type(items[0])
         assert all(isinstance(i, deck_type) for i in items), "A deck must contain only one type."
         self.deck = deque(items)
+        self.deck_type = deck_type
+        self.deck_class = items[0].__class__
 
     def shuffle(self):
         random.shuffle(self.deck)
@@ -30,6 +32,9 @@ class Deck:
     def draw(self) -> Any:
         out = self.deck.pop()
         return out
+
+    def __repr__(self):
+        return 'Deck({})'.format(self.deck_class.__name__)
 
 
 class AbstractEffect(ABC):
@@ -254,7 +259,11 @@ class AbstractAdventure(ABC, TrophyMixin):
         return len(self.tasks)
 
     def __repr__(self):
-        return '{}(\n\t{}\n)'.format(self.__class__.__name__, '\n\t'.join([str(task) for task in self.tasks]))
+        return '{}(\n\tname="{}"\n\ttasks=[\n\t\t{}\n\t]\n)'.format(
+            self.__class__.__name__,
+            self.name,
+            '\n\t\t'.join([str(task) for task in self.tasks])
+        )
 
     @abstractmethod
     def check(self, dice_pool_roll: List[Dice], character: 'Investigator') -> List[SuccessfulTaskOption]:
@@ -381,7 +390,7 @@ class Board:
         self.ancient_one = ancient_one
         self.decks = decks
 
-        self.clock = Clock()
+        self.clock = Clock(self)
 
     @classmethod
     def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
@@ -395,7 +404,7 @@ class Board:
         )
 
         decks = {}
-        for item_type in [item.CommonItem, item.UniqueItem, item.Spell, item.Ally]:
+        for item_type in [item.CommonItem, item.UniqueItem, item.Spell, item.Ally, item.Clue]:
             items = []
             for i in range(10):
                 items.append(item_type())

@@ -191,7 +191,7 @@ class AddItem(AdventureEffect):
         if self.amount > 0:
             for i in range(self.amount):
                 drawn_item = eldersign.decks[self.item_type].draw()
-                adventure_attempt.character.items += drawn_item
+                adventure_attempt.character.items.append(drawn_item)
         else:
             to_remove = []
             for item in adventure_attempt.character.items:

@@ -1,4 +1,4 @@
-from eldersign.core import Task, EmptyMonsterTask, HealthCost, SanityCost
+from eldersign.core import Task, EmptyMonsterTask, HealthCost, SanityCost, AbstractAdventure
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
 from eldersign import effect
@@ -1005,6 +1005,3 @@ r_lyeh = UnorderedAdventure(
         effect.AddHealth(-2),
     ]
 )
-
-print(r_lyeh.to_art())
-# print(there_s_something_in_the_basement.to_art())

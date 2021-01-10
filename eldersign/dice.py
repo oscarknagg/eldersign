@@ -73,6 +73,18 @@ class DicePool:
     def __len__(self):
         return len(self.dice)
 
+    @classmethod
+    def from_dice_counts(cls, green: int, yellow: int, red: int):
+        dice = []
+        for _ in range(green):
+            dice.append(GreenDice())
+        for _ in range(yellow):
+            dice.append(YellowDice())
+        for _ in range(red):
+            dice.append(RedDice())
+
+        return cls(dice)
+
     def roll(self):
         for dice in self.dice:
             if not dice.frozen:
