@@ -241,7 +241,7 @@ class SpendTrophies(InvestigatorEffect):
         to_remove = []
         for t in sorted(investigator.trophies, key=lambda t: t.trophy_value):
             num_spent += t.trophy_value
-            to_remove += t
+            to_remove.append(t)
 
             if num_spent >= self.value:
                 break

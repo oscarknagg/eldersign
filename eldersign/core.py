@@ -18,6 +18,15 @@ class TrophyMixin:
         self.trophy_value = tropy_value
 
 
+class DictableMixin:
+    def state_dict(self):
+        state_dict = {}
+
+        for attr in dir(self):
+            if isinstance(attr, DictableMixin):
+                pass
+
+
 class Deck:
     def __init__(self, items: list):
         deck_type = type(items[0])
@@ -301,6 +310,11 @@ class AbstractAdventure(ABC, TrophyMixin):
                 self._at_midnight_effect.__class__.__name__, self.name))
             self._at_midnight_effect(adventure_attempt=None, eldersign=eldersign)
 
+    def state_dict(self) -> dict:
+        return {
+            'name': self.name
+        }
+
     def to_art(self):
         from tabulate import tabulate
         import numpy as np
@@ -349,9 +363,16 @@ class AncientOne:
         self.elder_signs = 0
         self.max_elder_signs = max_elder_signs
 
+    def state_dict(self) -> dict:
+        return {
+            'doom_tokens': self.doom_tokens,
+            'elder_signs': self.elder_signs
+        }
+
 
 class Clock:
     def __init__(self, board: 'Board'):
+        self.day = 0
         self.hour = 0
 
         self.board = board
@@ -367,9 +388,16 @@ class Clock:
 
         if self.hour >= 12:
             self.hour = self.hour % 12
+            self.day += 1
             self.at_midnight()
 
         log.debug("Clock time is now {}".format(self.hour))
+
+    def state_dict(self) -> dict:
+        return {
+            'hour': self.hour,
+            'day': self.day
+        }
 
 
 class Board:
@@ -398,14 +426,22 @@ class Board:
 
     @classmethod
     def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
-        ancient_one = AncientOne(max_doom_tokens=12, max_elder_signs=13)
-
-        character = Investigator(
-            health=5,
-            sanity=5,
-            items=[],
-            trophies=[]
+        ancient_one = AncientOne(
+            max_doom_tokens=12,
+            max_elder_signs=13
         )
+        ancient_one.doom_tokens = 5
+        ancient_one.elder_signs = 5
+
+        characters = []
+        for _ in range(3):
+            character = Investigator(
+                health=4,
+                sanity=4,
+                items=[],
+                trophies=[TrophyMixin(2), TrophyMixin(1)]
+            )
+            characters.append(character)
 
         decks = {}
         for item_type in [item.CommonItem, item.UniqueItem, item.Spell, item.Ally, item.Clue]:
@@ -418,12 +454,27 @@ class Board:
         board = Board(
             adventures=[adventure],
             other_worlds=[],
-            characters=[character],
+            characters=characters,
             ancient_one=ancient_one,
             decks=decks
         )
 
         return board
+
+    def state_dict(self) -> dict:
+        # TODO: Make this smart and recursive
+        state_dict = {
+            'adventures': [
+                adventure.state_dict() for adventure in self.adventures if adventure
+            ],
+            'characters': [
+                character.state_dict() for character in self.characters
+            ],
+            'ancient_one': self.ancient_one.state_dict(),
+            'clock': self.clock.state_dict()
+        }
+
+        return state_dict
 
 
 class Investigator:
@@ -445,3 +496,18 @@ class Investigator:
 
     def __repr__(self):
         return 'Character(health={},sanity={})'.format(self.health, self.sanity)
+
+    def state_dict(self) -> dict:
+        state_dict = {
+            'health': self.health,
+            'sanity': self.sanity,
+            'cursed': self.cursed,
+            'blessed': self.blessed,
+            'items': [
+                item.state_dict() for item in self.items
+            ],
+            'trophies': [
+                trophy.trophy_value for trophy in self.trophies
+            ]
+        }
+        return state_dict

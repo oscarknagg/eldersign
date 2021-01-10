@@ -68,7 +68,9 @@ class TestEveryAdventure(unittest.TestCase):
     def test_every_card_unseen_forces(self):
         self._test_every_card_in_expansion('unseen_forces')
 
-    def _test_particular_adventure(self):
-        adventure = cards.expansions['unseen_forces']['strange_robberies']
+    def test_particular_adventure(self):
+        # adventure = cards.expansions['unseen_forces']['strange_robberies']
+        adventure = cards.base.mysterious_tome
         adventure_name, board_state, exception = test_single_adventure(adventure)
-        import pdb; pdb.set_trace()
+        if exception:
+            import pdb; pdb.set_trace()
