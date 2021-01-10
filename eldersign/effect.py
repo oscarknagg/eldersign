@@ -3,13 +3,21 @@ from typing import List, Type, TypeVar, Optional
 import logging
 import random
 
-from eldersign.core import AbstractEffect, AdventureEffect, Investigator, InvestigatorEffect
+from eldersign.core import AbstractEffect, AdventureEffect, Investigator, InvestigatorEffect, Board
 from eldersign.symbol import Terror
 from eldersign.item import Item
 
 
 log = logging.getLogger(__name__)
 T = TypeVar('T')
+
+
+class InvestigatorAttemptingAdventure(AdventureEffect):
+    def __init__(self, effect: InvestigatorEffect):
+        self.effect = effect
+
+    def apply_effect(self, adventure_atttempt, eldersign: Board):
+        self.effect(adventure_atttempt.character)
 
 
 class EffectChoice(AbstractEffect):
@@ -34,17 +42,17 @@ class InvestigatorEffectChoice(InvestigatorEffect):
         effect(investigator)
 
 
-def union_effects(effects: List[T]) -> T:
-    """I don't know if this will work but its cool."""
-    class _UnionEffect(type(effects[0])):
-        def __init__(self, _effects: List[T]):
-            self._effects = _effects
-
-        def apply_effect(self, *args, **kwargs):
-            for effect in self._effects:
-                effect(*args, **kwargs)
-
-    return _UnionEffect(_effects=effects)
+# def union_effects(effects: List[T]) -> T:
+#     """I don't know if this will work but its cool."""
+#     class _UnionEffect(type(effects[0])):
+#         def __init__(self, _effects: List[T]):
+#             self._effects = _effects
+#
+#         def apply_effect(self, *args, **kwargs):
+#             for effect in self._effects:
+#                 effect(*args, **kwargs)
+#
+#     return _UnionEffect(_effects=effects)
 
 
 class UnionEffect(AbstractEffect):
@@ -61,7 +69,7 @@ class AddDoomToken(AdventureEffect):
         self.value = value
 
     def apply_effect(self, adventure_attempt, eldersign):
-        eldersign.ancient_one.doom_tokens = max(0, eldersign.ancient_one.doom_tokens-self.value)
+        eldersign.ancient_one.doom_tokens = max(0, eldersign.ancient_one.doom_tokens+self.value)
 
 
 class AddElderSign(AdventureEffect):
@@ -69,7 +77,7 @@ class AddElderSign(AdventureEffect):
         self.value = value
 
     def apply_effect(self, adventure_attempt, eldersign):
-        eldersign.ancient_one.elder_signs = max(0, eldersign.ancient_one.elder_signs-self.value)
+        eldersign.ancient_one.elder_signs = max(0, eldersign.ancient_one.elder_signs+self.value)
 
 
 class InvestigatorAdventureEffect(AdventureEffect):
@@ -94,7 +102,7 @@ class AddHealth(InvestigatorEffect):
         self.value = value
 
     def apply_effect(self, investigator: Investigator):
-        investigator.health -= self.value
+        investigator.health += self.value
 
 
 class ItsGotMe(InvestigatorEffect):
@@ -110,7 +118,7 @@ class AddSanity(InvestigatorEffect):
         self.value = value
 
     def apply_effect(self, investigator: Investigator):
-        investigator.sanity -= self.value
+        investigator.sanity += self.value
 
 
 class SetHealthSanity(InvestigatorEffect):

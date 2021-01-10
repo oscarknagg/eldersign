@@ -93,12 +93,23 @@ class AdventureAttempt:
             else:
                 raise TypeError("{} of type {} is not expected.".format(effect, type(effect)))
 
+    def finish(self, succeeded: bool):
+        # Reset task status
+        for task in self.adventure.tasks:
+            task.complete = False
+
+        if isinstance(self.adventure, OrderedAdventure):
+            self.adventure.current_task = 0
+
+        self.apply_consequences(succeeded)
+
     def attempt(self) -> bool:
         """True if the adventure is completed."""
         log.debug("Attempting adventure:\n{}".format(self.adventure))
         self.dice_pool.unfreeze()
         self.adventure.entry_effect(self, self.adventure.board)
         self._apply_membership()
+        self.adventure.num_attempts += 1
 
         while len(self.dice_pool) > 0:
             self.dice_pool.roll()
@@ -143,12 +154,12 @@ class AdventureAttempt:
             ))
 
             if self.force_failed:
-                self.apply_consequences(False)
+                self.finish(False)
                 return False
 
             if self.adventure.is_complete:
-                self.apply_consequences(True)
+                self.finish(True)
                 return True
 
-        self.apply_consequences(False)
+        self.finish(False)
         return False

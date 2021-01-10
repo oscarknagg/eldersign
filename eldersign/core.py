@@ -242,6 +242,8 @@ class AbstractAdventure(ABC, TrophyMixin):
 
         self.board = board
 
+        self.num_attempts = 0
+
     @property
     def incomplete_tasks(self):
         tasks = []
