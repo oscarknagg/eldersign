@@ -5,7 +5,10 @@ import random
 
 
 class Item:
-    pass
+    def state_dict(self):
+        return {
+            '__class__': self.__class__.__name__
+        }
 
 
 class Clue(Item):

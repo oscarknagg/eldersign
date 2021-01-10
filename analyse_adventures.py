@@ -82,13 +82,14 @@ def main(args: argparse.Namespace):
     args.run_dir = setup_dir(args.run_dir)
     for expansion in args.expansions:
         for adventure_id, adventure in cards.expansions[expansion].items():
+            os.makedirs(os.path.join(args.run_dir, adventure_id))
+
             for scenario in SCENARIOS:
                 log.info("Adventure: {}, scenario = {}".format(adventure.name, scenario['name']))
                 # Make N lots of this scenario
                 boards = pool.starmap(setup_attempt, [(adventure, scenario)]*args.num_repeats)
 
                 # Run all attempts
-                os.makedirs(os.path.join(args.run_dir, adventure_id))
                 starmap_args = (
                     boards,
                     [args.run_dir]*args.num_repeats,
@@ -97,6 +98,11 @@ def main(args: argparse.Namespace):
                 )
                 starmap_args = list(zip(*starmap_args))
                 pool.starmap(run_attempt, starmap_args)
+
+        #     break
+        # break
+
+    pool.close()
 
 
 if __name__ == '__main__':

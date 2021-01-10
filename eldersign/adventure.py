@@ -3,6 +3,7 @@ from typing import List, Any, Optional
 from eldersign.core import Task, SuccessfulTaskOption, log, AbstractAdventure, AdventureEffect, Investigator, InvestigatorEffect
 from eldersign.dice import Dice, DicePool
 from eldersign.policy.clue import CluePolicy, FreezeMatchedDice
+from eldersign.policy.focus import FocusPolicy, NeverFocus
 from eldersign.symbol import Terror
 
 
@@ -64,12 +65,14 @@ class AdventureAttempt:
                  dice_pool: DicePool,
                  character: Any,
                  num_clues: int = 0,
-                 clue_policy: CluePolicy = None):
+                 clue_policy: Optional[CluePolicy] = None,
+                 focus_policy: Optional[FocusPolicy] = None):
         self.adventure = adventure
         self.dice_pool = dice_pool
         self.character = character
         self.num_clues = num_clues
-        self.clue_policy = clue_policy or FreezeMatchedDice()
+        self.clue_policy = clue_policy or FreezeMatchedDice(reroll_investigation_below=3)
+        self.focus_policy = focus_policy or NeverFocus()
 
         self.force_failed = False
 
@@ -95,6 +98,7 @@ class AdventureAttempt:
 
     def finish(self, succeeded: bool):
         # Reset task status
+        self.force_failed = False
         for task in self.adventure.tasks:
             task.complete = False
 
@@ -133,6 +137,10 @@ class AdventureAttempt:
                     cost.apply(self.character)
             else:
                 # Handle failures
+                # Apply terror
+                if Terror() in self.dice_pool:
+                    self.adventure.terror_effect(self, self.adventure.board)
+
                 # Apply clue policy
                 if self.num_clues > 0:
                     # Retry using a clue to re-roll
@@ -140,9 +148,8 @@ class AdventureAttempt:
                     self.num_clues -= 1
                     continue
 
-                # Apply terror
-                if Terror() in self.dice_pool:
-                    self.adventure.terror_effect(self, self.adventure.board)
+                # Apply focus policy
+                self.focus_policy.act(self.dice_pool, self.adventure)
 
                 # Remove a die
                 log.debug("Requirements not met, discarding a dice.")

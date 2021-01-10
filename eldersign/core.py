@@ -223,6 +223,12 @@ class CluePolicy(ABC):
         raise NotImplementedError
 
 
+class FocusPolicy(ABC):
+    @abstractmethod
+    def act(self, dice: DicePool, adventure: 'AbstractAdventure'):
+        raise NotImplementedError
+
+
 class AbstractAdventure(ABC, TrophyMixin):
     def __init__(self,
                  tasks: List[Task],

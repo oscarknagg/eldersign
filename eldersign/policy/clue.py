@@ -23,7 +23,9 @@ class FreezeMatchedDice(CluePolicy):
     def act(self, dice: DicePool, adventure: AbstractAdventure):
         # Get unique task symbols
         unique_symbols = set()
+        highest_investigation_count = 0
         for task in adventure.available_tasks:
+            task_investigation_count = 0
             for symbol in task.symbols:
                 if isinstance(symbol, SymbolUnion):
                     for sym in symbol.symbols:
@@ -31,12 +33,26 @@ class FreezeMatchedDice(CluePolicy):
                 else:
                     unique_symbols.add(symbol.__class__)
 
+                if isinstance(symbol, Investigation):
+                    task_investigation_count += symbol.value
+
+            if task_investigation_count > highest_investigation_count:
+                highest_investigation_count = task_investigation_count
+
         # Freeze dice with these symbols
         dice_frozen = []
         dice_reroll = []
+        total_investigation_count_frozen = 0
         for d in dice:
-            if isinstance(d, Investigation) and d.value < self.reroll_investigation_below:
-                dice_reroll.append(d)
+            if isinstance(d.symbol, Investigation):
+                matched_enough_investigations = total_investigation_count_frozen >= highest_investigation_count
+                re_roll_investigation = (not matched_enough_investigations) or (d.symbol.value < self.reroll_investigation_below)
+                if re_roll_investigation:
+                    dice_reroll.append(d)
+                else:
+                    d.frozen = True
+                    dice_frozen.append(d)
+                    total_investigation_count_frozen += d.symbol.value
             elif d.symbol.__class__ in unique_symbols:
                 d.frozen = True
                 dice_frozen.append(d)
