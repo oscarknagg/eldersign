@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Type, TypeVar
+from typing import List, Type, TypeVar, Optional
 import logging
 import random
 
@@ -97,12 +97,33 @@ class AddHealth(InvestigatorEffect):
         investigator.health -= self.value
 
 
+class ItsGotMe(InvestigatorEffect):
+    """Specifically for the It's Got Me adventure"""
+    def apply_effect(self, investigator: 'Investigator'):
+        dice_roll = random.randint(1, 6)
+        if dice_roll <= 3:
+            investigator.health -= dice_roll
+
+
 class AddSanity(InvestigatorEffect):
     def __init__(self, value: int):
         self.value = value
 
     def apply_effect(self, investigator: Investigator):
         investigator.sanity -= self.value
+
+
+class SetHealthSanity(InvestigatorEffect):
+    def __init__(self, health: Optional[int] = None, sanity: Optional[int] = None):
+        self.health = health
+        self.sanity = sanity
+
+    def apply_effect(self, investigator: Investigator):
+        if self.health:
+            investigator.health = self.health
+
+        if self.sanity:
+            investigator.sanity = self.sanity
 
 
 class Curse(InvestigatorEffect):
@@ -186,6 +207,15 @@ class AddItem(AdventureEffect):
 class OpenGate(AdventureEffect):
     def apply_effect(self, adventure_attempt, eldersign):
         pass
+
+
+class AddTime(AdventureEffect):
+    def __init__(self, value: int):
+        self.value = value
+
+    def apply_effect(self, adventure_attempt, eldersign):
+        for i in range(self.value):
+            eldersign.clock.add_hours(3)
 
 
 class SpendTrophies(InvestigatorEffect):

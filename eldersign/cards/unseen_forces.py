@@ -1,9 +1,312 @@
-from eldersign.core import Task, EmptyMonsterTask, HealthCost, SanityCost
+from eldersign.core import Task, EmptyMonsterTask, HealthCost, SanityCost, TimeCost
 from eldersign.adventure import UnorderedAdventure, OrderedAdventure
 from eldersign.symbol import Terror, Scroll, Skull, Investigation, SymbolUnion
 from eldersign import effect
 from eldersign import item
 
+
+heroic_rescue = OrderedAdventure(
+    name="Heroic Rescue",
+    tasks=[
+        Task([Skull()]),
+        Task([], [SanityCost(1)]),
+        Task([Terror(), Terror(), Terror()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.Ally),
+        effect.Bless(),
+    ],
+    penalties=[
+        effect.AddHealth(-1),
+    ],
+)
+
+break_on_through = UnorderedAdventure(
+    # Lock green dice
+    name="Break On Through",
+    tasks=[
+        Task([Scroll()], [SanityCost(1)]),
+        Task([Investigation(3), Scroll()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.UniqueItem),
+        effect.OpenGate(),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+        effect.AddHealth(-1),
+    ],
+)
+
+lingering_curse = UnorderedAdventure(
+    name="Lingering Curse",
+    tasks=[
+        Task([Investigation(3)]),
+        Task([Scroll(), Scroll(), Skull()]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.SetHealthSanity(health=1, sanity=1),
+    rewards=[
+        effect.AddItem(item.UniqueItem, 2),
+        effect.AddItem(item.Spell),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+        effect.AddHealth(-1),
+    ],
+)
+
+mysterious_puzzle_box = UnorderedAdventure(
+    name="Mysterious Puzzle Box",
+    tasks=[
+        Task([Scroll()]),
+    ],
+    trophy_value=2,
+    entry_effect=effect.union_effects([
+        effect.MonsterAppears(),
+        effect.MonsterAppears()
+    ]),
+    rewards=[
+        effect.AddElderSign(1),
+        effect.MonsterAppears()
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+        effect.AddHealth(-2),
+    ],
+)
+
+recruiting_aid = OrderedAdventure(
+    name="Recruiting Aid",
+    tasks=[
+        Task([Investigation(3)]),
+        Task([Investigation(6)]),
+        Task([Investigation(9)]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.Ally, 2),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+seeking_leads = OrderedAdventure(
+    name="Seeking Leads",
+    tasks=[
+        Task([Investigation(1)], monster_slot=0),
+        Task([Skull()]),
+        Task([Skull(), Scroll]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.Clue),
+    ],
+    penalties=[
+        effect.AddHealth(-2),
+    ],
+)
+
+midnight_visitor = UnorderedAdventure(
+    name="Grazed Writings",
+    tasks=[
+        Task([Skull(), Skull()]),
+        Task([Skull(), Terror()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.AddHealth(-1),
+    rewards=[
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.UniqueItem),
+        effect.AddItem(item.Clue),
+    ],
+    penalties=[
+        effect.AddHealth(-2),
+        effect.AddDoomToken(1),
+    ],
+)
+
+grazed_writings = UnorderedAdventure(
+    name="Grazed Writings",
+    tasks=[
+        Task([Investigation(4)], monster_slot=0),
+        Task([Terror()]),
+        Task([Scroll()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(1)
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+fragments_of_knowledge = UnorderedAdventure(
+    name="Fragments of Knowledge",
+    tasks=[
+        Task([Investigation(6)]),
+        Task([Terror()]),
+        Task([Scroll(), Scroll()], monster_slot=0),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.Clue),
+        effect.AddElderSign(1)
+    ],
+    penalties=[
+        effect.AddSanity(-2),
+    ],
+)
+
+rite_of_passage = OrderedAdventure(
+    name="Rite of Passage",
+    tasks=[
+        Task([Skull()], [SanityCost(1)]),
+        Task([Scroll()], [HealthCost(1)]),
+        Task([Investigation(3), Terror()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.Clue),
+        effect.AddElderSign(1)
+    ],
+    penalties=[
+        effect.AddDoomToken(1),
+        effect.AddHealth(-2),
+    ],
+)
+
+up_on_the_roof = UnorderedAdventure(
+    name="Up on the Roof",
+    tasks=[
+        EmptyMonsterTask(),
+        Task([Terror(), Skull(), Scroll()]),
+    ],
+    trophy_value=2,
+    entry_effect=effect.NotImplementedEffect("If there is no monster on this adventure place 1 monster on the task"
+                                             "below."),
+    terror_effect=effect.ItsGotMe(),
+    rewards=[
+        effect.AddItem(item.Spell),
+        effect.AddDoomToken(-1),
+        effect.AddElderSign(1),
+        effect.MonsterAppears()
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+        effect.AddHealth(-1),
+    ],
+)
+
+it_s_got_me = UnorderedAdventure(
+    name="It's got me!",
+    tasks=[
+        Task([Investigation(3), Skull(), Terror()], [HealthCost(1)]),
+    ],
+    trophy_value=2,
+    terror_effect=effect.ItsGotMe(),
+    rewards=[
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.Clue),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+the_boiler_room = UnorderedAdventure(
+    name="Just Sign Here",
+    tasks=[
+        Task([Investigation(4), Terror()]),
+        Task([Skull(), Terror()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddDoomToken(-1),
+        effect.AddElderSign(1),
+        effect.AddItem(item.Spell),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+        effect.AddHealth(-1),
+    ],
+)
+
+just_sign_here = UnorderedAdventure(
+    name="Just Sign Here",
+    tasks=[
+        Task([Scroll()]),
+        Task([Skull()]),
+        Task([Investigation(3)]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.OpenGate(),
+        effect.AddItem(item.Spell),
+        effect.Curse(),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
+
+test_of_faith = UnorderedAdventure(
+    name="Test of Faith",
+    tasks=[
+        Task([Investigation(6)]),
+        Task([Investigation(3), Skull()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.Bless(),
+    ],
+    penalties=[
+        effect.Curse(),
+    ],
+)
+
+walled_up = UnorderedAdventure(
+    name="Walled up",
+    tasks=[
+        Task([Investigation(2), Terror()], [SanityCost(1)]),
+        Task([Investigation(6)],),
+    ],
+    trophy_value=2,
+    terror_effect=effect.Curse(),
+    rewards=[
+        effect.AddItem(item.Clue),
+        effect.AddElderSign(2),
+        effect.MonsterAppears(),
+    ],
+    penalties=[
+        effect.AddSanity(-2),
+    ],
+)
+
+fickle_fates = UnorderedAdventure(
+    name="Fickle Fates",
+    tasks=[
+        EmptyMonsterTask(),
+        Task([Scroll(), Scroll()]),
+        Task([Investigation(2), Scroll()],),
+    ],
+    trophy_value=1,
+    rewards=[
+        effect.Bless(),
+        effect.MonsterAppears(),
+    ],
+    penalties=[
+        effect.AddSanity(-1),
+    ],
+)
 
 vital_information = OrderedAdventure(
     name="Vital Information",
@@ -22,7 +325,7 @@ vital_information = OrderedAdventure(
     ],
 )
 
-the_night_watchman = OrderedAdventure(
+the_night_watchman = UnorderedAdventure(
     # Lock green dice
     name="The Night Watchman",
     tasks=[
@@ -436,5 +739,61 @@ vision_of_demise = UnorderedAdventure(
     ],
     penalties=[
         effect.AddSanity(-1)
+    ]
+)
+
+another_time = UnorderedAdventure(
+    name='Another Time',
+    other_world=True,
+    tasks=[
+        Task([Scroll(), Scroll()], [TimeCost(1)]),
+        Task([Investigation(3)], [TimeCost(1)]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(2),
+        effect.AddItem(item.Clue, 2),
+
+    ],
+    penalties=[
+        effect.AddHealth(-1),
+        effect.AddTime(1)
+    ]
+)
+
+the_abyss = UnorderedAdventure(
+    name='The Abyss',
+    other_world=True,
+    tasks=[
+        Task([Skull(), Terror()], monster_slot=0),
+        Task([Scroll(), Scroll(), Skull()]),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(2),
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.CommonItem)
+    ],
+    penalties=[
+        effect.AddSanity(-2),
+        effect.AddHealth(-1),
+    ]
+)
+
+lost_carcosa = UnorderedAdventure(
+    name='Lost Carcosa',
+    other_world=True,
+    tasks=[
+        Task([Terror(), Terror(), Terror()]),
+        Task([Investigation(5)], monster_slot=0),
+    ],
+    trophy_value=2,
+    rewards=[
+        effect.AddElderSign(2),
+        effect.AddItem(item.Spell),
+        effect.AddItem(item.Clue)
+    ],
+    penalties=[
+        effect.AddSanity(-3),
     ]
 )

@@ -83,6 +83,21 @@ class HealthCost(Cost):
         character.health -= self.value
 
 
+class TimeCost(Cost):
+    def __init__(self, value: int):
+        self.value = value
+
+    def __repr__(self):
+        return 'Time({})'.format(self.value)
+
+    def check(self, character: 'Investigator'):
+        return True
+
+    def apply(self, character: 'Investigator'):
+        # TODO
+        pass
+
+
 class SanityCost(Cost):
     def __init__(self, value: int):
         self.value = value
@@ -197,6 +212,7 @@ class AbstractAdventure(ABC, TrophyMixin):
     def __init__(self,
                  tasks: List[Task],
                  trophy_value: int,
+                 other_world: bool = False,
                  event: bool = False,
                  entry_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
                  terror_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
@@ -208,6 +224,7 @@ class AbstractAdventure(ABC, TrophyMixin):
         TrophyMixin.__init__(self, tropy_value=trophy_value)
         assert all(isinstance(task, Task) for task in tasks)
         self.tasks = tasks
+        self.other_world = other_world
         self.event = event
         self.task_completion = {task: False for task in tasks}
         self._entry_effect = entry_effect
@@ -254,13 +271,22 @@ class AbstractAdventure(ABC, TrophyMixin):
     def entry_effect(self, adventure_attempt, eldersign: 'Board'):
         """Override in subclasses"""
         if self._entry_effect:
+            log.debug("Triggered entry effect: {} of adventure {}".format(
+                self._entry_effect.__class__.__name__, self.name))
             self._entry_effect(adventure_attempt, eldersign)
 
     def terror_effect(self, adventure_attempt, eldersign: 'Board'):
         """Override in subclasses"""
         if self._terror_effect:
-            log.debug("Triggered terror effect: {}".format(self._terror_effect.__class__.__name__))
+            log.debug("Triggered terror effect: {} of adventure {}".format(
+                self._terror_effect.__class__.__name__, self.name))
             self._terror_effect(adventure_attempt, eldersign)
+
+    def at_midnight_effect(self, eldersign: 'Board'):
+        if self._at_midnight_effect:
+            log.debug("Triggered at_midnight effect: {} of adventure {}".format(
+                self._at_midnight_effect.__class__.__name__, self.name))
+            self._at_midnight_effect(adventure_attempt=None, eldersign=eldersign)
 
     def to_art(self):
         from tabulate import tabulate
@@ -311,6 +337,28 @@ class AncientOne:
         self.max_elder_signs = max_elder_signs
 
 
+class Clock:
+    def __init__(self, board: 'Board'):
+        self.hour = 0
+
+        self.board = board
+
+    def at_midnight(self):
+        for adventure in self.board.adventures:
+            adventure.at_midnight_effect(self.board)
+
+            # TODO: Trigger monster at_midnights
+
+    def add_hours(self, hours: int):
+        self.hour += hours
+
+        if self.hour >= 12:
+            self.hour = self.hour % 12
+            self.at_midnight()
+
+        log.debug("Clock time is now {}".format(self.hour))
+
+
 class Board:
     def __init__(self,
                  adventures: List[AbstractAdventure],
@@ -318,7 +366,7 @@ class Board:
                  characters: List['Investigator'],
                  ancient_one: AncientOne,
                  decks: Dict[Type, Deck]):
-        self.adventures = [None, ] * 6
+        self.adventures: List[Optional[AbstractAdventure]] = [None, ] * 6
         assert len(adventures) <= len(self.adventures)
         for i, a in enumerate(adventures):
             self.adventures[i] = a
@@ -332,6 +380,8 @@ class Board:
         self.characters: List[Investigator] = characters
         self.ancient_one = ancient_one
         self.decks = decks
+
+        self.clock = Clock()
 
     @classmethod
     def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
