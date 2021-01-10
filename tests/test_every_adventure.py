@@ -2,6 +2,7 @@ import multiprocessing
 import traceback
 import unittest
 import logging
+import pytest
 
 from eldersign import cards
 from eldersign import core
@@ -14,6 +15,7 @@ log = logging.getLogger()
 log.setLevel("DEBUG")
 
 
+@pytest.mark.skip
 def test_single_adventure(adventure: core.AbstractAdventure):
     board = core.Board.setup_dummy_game(adventure)
     character = board.characters[0]
@@ -47,19 +49,26 @@ def test_single_adventure(adventure: core.AbstractAdventure):
     return adventure.name, board, exception_traceback
 
 
-class TestEveryCard(unittest.TestCase):
-    def test_every_card_base(self):
+class TestEveryAdventure(unittest.TestCase):
+    def _test_every_card_in_expansion(self, expansion: str):
         pool = multiprocessing.Pool(multiprocessing.cpu_count())
-        test_results = pool.map(test_single_adventure, list(cards.expansions['base'].values())[:10])
+        test_results = pool.map(test_single_adventure, list(cards.expansions[expansion].values()))
         for adventure_name, board_state, exception in test_results:
             if exception:
                 log.info(adventure_name)
                 log.info(exception)
                 import pdb; pdb.set_trace()
 
+        log.info("Tested {} adventures".format(len(test_results)))
         self.assertFalse(any(exception for _, _, exception in test_results))
-        import pdb; pdb.set_trace()
 
-    def test_particular_adventure(self):
-        adventure = cards.expansions['base']['a_secret_gathering']
-        test_single_adventure(adventure)
+    def test_every_card_base(self):
+        self._test_every_card_in_expansion('base')
+
+    def test_every_card_unseen_forces(self):
+        self._test_every_card_in_expansion('unseen_forces')
+
+    def _test_particular_adventure(self):
+        adventure = cards.expansions['unseen_forces']['strange_robberies']
+        adventure_name, board_state, exception = test_single_adventure(adventure)
+        import pdb; pdb.set_trace()

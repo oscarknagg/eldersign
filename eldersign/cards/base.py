@@ -12,7 +12,7 @@ ancient_relics = UnorderedAdventure(
         Task([Scroll(), Investigation(3)]),
     ],
     trophy_value=1,
-    terror_effect=effect.AddSanity(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     rewards=[
         effect.AddItem(item.Clue),
         effect.AddItem(item.Spell),
@@ -100,7 +100,7 @@ the_key_to_the_beyond = OrderedAdventure(
         Task([Scroll(), Skull(), Investigation(2)]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddSanity(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     rewards=[
         effect.AddItem(item.Clue, 2),
         effect.OpenGate(),
@@ -117,7 +117,7 @@ riot_in_the_streets = OrderedAdventure(
         Task([Investigation(9)]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddHealth(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
     rewards=[
         effect.AddElderSign(1),
         effect.AddItem(item.UniqueItem),
@@ -135,7 +135,7 @@ unnatural_habitat = UnorderedAdventure(
         Task([Skull(), Skull(), Investigation(3)]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddSanity(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     rewards=[
         effect.AddItem(item.Spell),
     ],
@@ -204,7 +204,7 @@ hallway_on_fire = OrderedAdventure(
         Task([Skull()], [HealthCost(1)]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddHealth(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
     rewards=[
         effect.AddItem(item.UniqueItem),
         effect.AddItem(item.UniqueItem),
@@ -239,7 +239,7 @@ late_night_break_in = UnorderedAdventure(
         Task([Investigation(6)]),
     ],
     trophy_value=1,
-    terror_effect=effect.SpendTrophies(1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.SpendTrophies(1)),
     rewards=[
         effect.AddItem(item.Clue),
     ],
@@ -293,7 +293,7 @@ a_secret_gathering = UnorderedAdventure(
         Task([Scroll(), Scroll()]),
     ],
     trophy_value=1,
-    terror_effect=effect.AddSanity(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     rewards=[
         effect.MonsterAppears(),
         effect.AddItem(item.Clue),
@@ -481,7 +481,6 @@ the_elder_sign = OrderedAdventure(
         Task([Investigation(2), Scroll()]),
     ],
     trophy_value=2,
-    terror_effect=effect.SpendTrophies(1),
     rewards=[
         effect.AddDoomToken(-1),
         effect.AddElderSign(1),
@@ -500,7 +499,6 @@ the_writing_on_the_wall = UnorderedAdventure(
         Task([Scroll(), Skull(), Investigation(3)]),
     ],
     trophy_value=2,
-    terror_effect=effect.SpendTrophies(1),
     rewards=[
         effect.AddItem(item.Spell),
         effect.OpenGate(),
@@ -694,7 +692,7 @@ the_hall_of_the_dead = UnorderedAdventure(
     name="The Hall of the Dead",
     tasks=[
         Task([Scroll()]),
-        Task([Skull(), Skull]),
+        Task([Skull(), Skull()]),
         Task([Investigation(5)]),
     ],
     trophy_value=1,
@@ -939,7 +937,7 @@ plateau_of_leng = UnorderedAdventure(
         Task([Terror(), Skull(), Terror()]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddSanity(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     rewards=[
         effect.AddDoomToken(-1),
         effect.AddElderSign(1),

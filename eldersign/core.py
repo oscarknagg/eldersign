@@ -126,6 +126,7 @@ class Task(ABC):
                  monster_slot: Optional[int] = None):
         self._symbols: List[Symbol] = symbols
         self.costs: List[Cost] = costs or []
+        assert all(isinstance(sym, Symbol) for sym in symbols)
         assert membership in ('silver_twilight', 'sheldon_gang', None)
         self.membership = membership
 
@@ -219,8 +220,8 @@ class AbstractAdventure(ABC, TrophyMixin):
                  trophy_value: int,
                  other_world: bool = False,
                  event: bool = False,
-                 entry_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
-                 terror_effect: Optional[Union[AdventureEffect, InvestigatorEffect]] = None,
+                 entry_effect: Optional[AbstractEffect] = None,
+                 terror_effect: Optional[AbstractEffect] = None,
                  at_midnight_effect: Optional[AdventureEffect] = None,
                  rewards: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
                  penalties: Optional[List[Union[AdventureEffect, InvestigatorEffect]]] = None,
@@ -289,6 +290,7 @@ class AbstractAdventure(ABC, TrophyMixin):
         if self._terror_effect:
             log.debug("Triggered terror effect: {} of adventure {}".format(
                 self._terror_effect.__class__.__name__, self.name))
+            
             self._terror_effect(adventure_attempt, eldersign)
 
     def at_midnight_effect(self, eldersign: 'Board'):

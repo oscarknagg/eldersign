@@ -47,7 +47,7 @@ lingering_curse = UnorderedAdventure(
         Task([Scroll(), Scroll(), Skull()]),
     ],
     trophy_value=2,
-    terror_effect=effect.SetHealthSanity(health=1, sanity=1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.SetHealthSanity(health=1, sanity=1)),
     rewards=[
         effect.AddItem(item.UniqueItem, 2),
         effect.AddItem(item.Spell),
@@ -64,7 +64,7 @@ mysterious_puzzle_box = UnorderedAdventure(
         Task([Scroll()]),
     ],
     trophy_value=2,
-    entry_effect=effect.union_effects([
+    entry_effect=effect.UnionEffect([
         effect.MonsterAppears(),
         effect.MonsterAppears()
     ]),
@@ -99,7 +99,7 @@ seeking_leads = OrderedAdventure(
     tasks=[
         Task([Investigation(1)], monster_slot=0),
         Task([Skull()]),
-        Task([Skull(), Scroll]),
+        Task([Skull(), Scroll()]),
     ],
     trophy_value=2,
     rewards=[
@@ -118,7 +118,7 @@ midnight_visitor = UnorderedAdventure(
         Task([Skull(), Terror()], [HealthCost(1)]),
     ],
     trophy_value=2,
-    terror_effect=effect.AddHealth(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
     rewards=[
         effect.AddItem(item.CommonItem),
         effect.AddItem(item.UniqueItem),
@@ -193,7 +193,6 @@ up_on_the_roof = UnorderedAdventure(
     trophy_value=2,
     entry_effect=effect.NotImplementedEffect("If there is no monster on this adventure place 1 monster on the task"
                                              "below."),
-    terror_effect=effect.ItsGotMe(),
     rewards=[
         effect.AddItem(item.Spell),
         effect.AddDoomToken(-1),
@@ -212,7 +211,7 @@ it_s_got_me = UnorderedAdventure(
         Task([Investigation(3), Skull(), Terror()], [HealthCost(1)]),
     ],
     trophy_value=2,
-    terror_effect=effect.ItsGotMe(),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.ItsGotMe()),
     rewards=[
         effect.AddItem(item.Spell),
         effect.AddItem(item.Clue),
@@ -280,7 +279,7 @@ walled_up = UnorderedAdventure(
         Task([Investigation(6)],),
     ],
     trophy_value=2,
-    terror_effect=effect.Curse(),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.Curse()),
     rewards=[
         effect.AddItem(item.Clue),
         effect.AddElderSign(2),
@@ -426,9 +425,9 @@ strange_robberies = UnorderedAdventure(
         Task([Skull(), Scroll(), Skull()]),
     ],
     trophy_value=3,
-    entry_effect=effect.union_effects([
-        effect.AddHealth(-1),
-        effect.AddSanity(-1),
+    entry_effect=effect.UnionEffect([
+       effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
+       effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
     ]),
     rewards=[
         effect.AddItem(item.UniqueItem),
@@ -463,7 +462,7 @@ bloody_footprints = UnorderedAdventure(
         Task([Terror()]),
     ],
     trophy_value=1,
-    terror_effect=effect.AddHealth(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
     rewards=[
         effect.AddElderSign(1),
         effect.AddItem(item.Clue),
@@ -482,7 +481,7 @@ under_construction = UnorderedAdventure(
         Task([Scroll(), Scroll()]),
     ],
     trophy_value=1,
-    terror_effect=effect.AddHealth(-1),
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1)),
     rewards=[
         effect.AddItem(item.CommonItem),
         effect.AddItem(item.Clue),
@@ -555,11 +554,7 @@ too_quiet = UnorderedAdventure(
         Task([Terror(), Terror()]),
     ],
     trophy_value=2,
-    # at_midnight_effect=effect.UnionEffect([
-    #     effect.DoomTokenEffect(1),
-    #     effect.MonsterAppears()
-    # ]),
-    at_midnight_effect=effect.union_effects([
+    at_midnight_effect=effect.UnionEffect([
         effect.AddDoomToken(1),
         effect.MonsterAppears()
     ]),
@@ -597,8 +592,10 @@ wicked_old_man = UnorderedAdventure(
         Task([Investigation(3), Terror()]),
     ],
     trophy_value=3,
-    # terror_effect=effect.UnionEffect([effect.SanityEffect(-1), effect.HealthEffect(-1)]),
-    terror_effect=effect.union_effects([effect.AddSanity(-1), effect.AddHealth(-1)]),
+    terror_effect=effect.UnionEffect([
+        effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1)),
+        effect.InvestigatorAttemptingAdventure(effect.AddHealth(-1))
+    ]),
     rewards=[
         effect.AddElderSign(1),
         effect.AddItem(item.Clue),
@@ -654,7 +651,6 @@ walking_the_ledge = OrderedAdventure(
         Task([Skull(), Skull()]),
     ],
     trophy_value=2,
-    terror_effect=effect.MonsterAppearsOnEveryMonsterTask(),
     at_midnight_effect=effect.NotImplementedEffect("Discard this adventure and do not replace it"),
     rewards=[
         effect.AddItem(item.CommonItem),
@@ -674,7 +670,6 @@ it_s_quiet = UnorderedAdventure(
         Task([Investigation(12)]),
     ],
     trophy_value=1,
-    terror_effect=effect.MonsterAppearsOnEveryMonsterTask(),
     at_midnight_effect=effect.NotImplementedEffect("Discard this adventure and do not replace it"),
     rewards=[
         effect.AddItem(item.Clue),
@@ -720,7 +715,7 @@ balancing_mind_and_body = UnorderedAdventure(
     penalties=[
         effect.AddHealth(-1)
     ],
-    terror_effect=effect.AddSanity(-1)
+    terror_effect=effect.InvestigatorAttemptingAdventure(effect.AddSanity(-1))
 )
 
 vision_of_demise = UnorderedAdventure(
