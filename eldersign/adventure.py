@@ -7,23 +7,12 @@ from eldersign.symbol import Terror
 
 
 class UnorderedAdventure(AbstractAdventure):
-    # def __init__(self,
-    #              tasks: List[Task],
-    #              trophy_value: int,
-    #              event: bool = False,
-    #              entry_effect: Optional[AdventureEffect] = None,
-    #              terror_effect: Optional[AdventureEffect] = None,
-    #              rewards: Optional[List[AdventureEffect]] = None,
-    #              penalties: Optional[List[AdventureEffect]] = None,
-    #              name: Optional[str] = None):
-    #     super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
-
     def check(self, dice_pool_roll: List[Dice], character: Investigator) -> List[SuccessfulTaskOption]:
         successful_tasks = []
         for task in self.incomplete_tasks:
             log.debug("Checking requirements for {}".format(task))
             met_task_requirements = task.check_requirements(dice_pool_roll, character)
-            if met_task_requirements:
+            if met_task_requirements is not None:
                 dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
                 successful_task = SuccessfulTaskOption(
                     task,
@@ -39,15 +28,6 @@ class UnorderedAdventure(AbstractAdventure):
 
 
 class OrderedAdventure(AbstractAdventure):
-    # def __init__(self,
-    #              tasks: List[Task],
-    #              trophy_value: int,
-    #              event: bool = False,
-    #              entry_effect: Optional[AdventureEffect] = None,
-    #              terror_effect: Optional[AdventureEffect] = None):
-    #     super().__init__(tasks, trophy_value, event, entry_effect=entry_effect, terror_effect=terror_effect)
-    #     self.current_task = 0
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.current_task = 0
@@ -59,7 +39,7 @@ class OrderedAdventure(AbstractAdventure):
         # a single task
         met_task_requirements = task.check_requirements(dice_pool_roll, character)
 
-        if met_task_requirements:
+        if met_task_requirements is not None:
             dice_used = [dice for symbol, dice_group in met_task_requirements for dice in dice_group]
             successful_task = SuccessfulTaskOption(
                 task,
