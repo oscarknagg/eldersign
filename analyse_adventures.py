@@ -2,6 +2,7 @@ from copy import deepcopy
 import multiprocessing
 import argparse
 import logging
+import time
 import uuid
 import json
 import os
@@ -15,7 +16,7 @@ from eldersign.policy.clue import FreezeMatchedDice
 
 
 log = logging.getLogger()
-log.setLevel('DEBUG')
+log.setLevel('INFO')
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)s.%(module)s.%(funcName)s Line:%(lineno)d: %(asctime)s %(message)s')
 handler.setFormatter(fmt=formatter)
@@ -23,15 +24,15 @@ log.addHandler(handler)
 
 
 SCENARIOS = [
-    # {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0},
-    # {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0},
-    # {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0},
-    # {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0},
-    # {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0},
+    {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0},
+    {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0},
+    {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0},
+    {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0},
+    {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0},
     {'name': 'clue',            'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 1},
-    # {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    # {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    # {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3},
+    {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
+    {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
+    {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3},
 ]
 
 
@@ -63,7 +64,7 @@ def run_attempt(attempt: AdventureAttempt, run_dir: str, adventure_id: str, scen
             'scenario': scenario,
             'before': before,
             'after': after,
-            'succeeded': succeeded
+            'succeeded': succeeded,
         }, f)
 
 
@@ -79,38 +80,38 @@ def setup_dir(run_dir: str) -> str:
     return run_dir
 
 
+def process_adventure(adventure_id, adventure, num_repeats, run_dir):
+    os.makedirs(os.path.join(run_dir, adventure_id))
+    for scenario in SCENARIOS:
+        log.info("Adventure: {}, scenario = {}".format(adventure.name, scenario['name']))
+        for i in range(num_repeats):
+            adventure_attempt = setup_attempt(adventure, scenario)
+            run_attempt(adventure_attempt, run_dir, adventure_id, scenario)
+
+
 def main(args: argparse.Namespace):
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     args.run_dir = setup_dir(args.run_dir)
-    for expansion in args.expansions:
-        for adventure_id, adventure in cards.expansions[expansion].items():
-            os.makedirs(os.path.join(args.run_dir, adventure_id))
-
-            for scenario in SCENARIOS:
-                log.info("Adventure: {}, scenario = {}".format(adventure.name, scenario['name']))
-                # Make N lots of this scenario
-                boards = pool.starmap(setup_attempt, [(adventure, scenario)]*args.num_repeats)
-
-                # Run all attempts
-                starmap_args = (
-                    boards,
-                    [args.run_dir]*args.num_repeats,
-                    [adventure_id]*args.num_repeats,
-                    [scenario]*args.num_repeats,
-                )
-                starmap_args = list(zip(*starmap_args))
-                pool.starmap(run_attempt, starmap_args)
-
-            break
-        break
-
+    adventure_cards_to_process = [
+        (
+            adventure_id,
+            adventure,
+            args.num_repeats,
+            args.run_dir
+        )
+        for expansion in args.expansions
+        for adventure_id, adventure in cards.expansions[expansion].items()
+    ]
+    t0 = time.time()
+    pool.starmap(process_adventure, adventure_cards_to_process)
+    log.info("Processed {} adventure cards in {:.2f}s".format(len(adventure_cards_to_process), time.time()-t0))
     pool.close()
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-repeats', '-n', type=int, default=1)
+    parser.add_argument('--num-repeats', '-n', type=int, default=1000)
     parser.add_argument('--run-dir')
     parser.add_argument('--expansions', nargs='+', default=['base', 'unseen_forces'])
     args = parser.parse_args()
