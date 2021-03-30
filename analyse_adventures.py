@@ -1,5 +1,7 @@
+from typing import Union, Any
 from copy import deepcopy
 import multiprocessing
+import pandas as pd
 import argparse
 import logging
 import time
@@ -53,19 +55,12 @@ def setup_attempt(adventure: core.AbstractAdventure, scenario: dict) -> Adventur
     return adventure_attempt
 
 
-def run_attempt(attempt: AdventureAttempt, run_dir: str, adventure_id: str, scenario: str):
+def run_attempt(attempt: AdventureAttempt):
     before = attempt.adventure.board.state_dict()
     succeeded = attempt.attempt()
     after = attempt.adventure.board.state_dict()
     attempt_uuid = uuid.uuid4().hex
-    with open(f'{run_dir}/{adventure_id}/{attempt_uuid}.json', 'w') as f:
-        json.dump({
-            'uuid': attempt_uuid,
-            'scenario': scenario,
-            'before': before,
-            'after': after,
-            'succeeded': succeeded,
-        }, f)
+    return attempt_uuid, before, after, succeeded
 
 
 def setup_dir(run_dir: str) -> str:
@@ -80,13 +75,50 @@ def setup_dir(run_dir: str) -> str:
     return run_dir
 
 
+def flatten_dict(d: dict):
+    d_flat = {}
+
+    def _flatten(node: Union[dict, list, Any], path: str = ''):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                _flatten(v, path + '.' + k if path else k)
+        elif isinstance(node, list):
+            for i, element in enumerate(node):
+                _flatten(element, path + f'[{i}]')
+        else:
+            d_flat[path] = node
+
+    _flatten(d)
+
+    return d_flat
+
+
+def build_row(adventure_id, attempt_id, board, after, succeeded, scenario) -> dict:
+    """Calculates before/after delta"""
+    row = {
+        'adventure_id': adventure_id,
+        'attempt_id': attempt_id,
+        'succeeded': succeeded,
+        'after': after,
+        **flatten_dict({'scenario': scenario}),
+        **flatten_dict(board)
+    }
+    return row
+
+
 def process_adventure(adventure_id, adventure, num_repeats, run_dir):
-    os.makedirs(os.path.join(run_dir, adventure_id))
+    runs = []
     for scenario in SCENARIOS:
         log.info("Adventure: {}, scenario = {}".format(adventure.name, scenario['name']))
         for i in range(num_repeats):
             adventure_attempt = setup_attempt(adventure, scenario)
-            run_attempt(adventure_attempt, run_dir, adventure_id, scenario)
+            attempt_id, before, after, succeeded = run_attempt(adventure_attempt)
+            row = build_row(adventure_id, attempt_id, before, False, succeeded, scenario)
+            runs.append(row)
+            row = build_row(adventure_id, attempt_id, after, True, succeeded, scenario)
+            runs.append(row)
+
+    pd.DataFrame(runs).to_parquet(f'{run_dir}/{adventure_id}.parquet')
 
 
 def main(args: argparse.Namespace):
@@ -111,7 +143,7 @@ def main(args: argparse.Namespace):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-repeats', '-n', type=int, default=1000)
+    parser.add_argument('--num-repeats', '-n', type=int, default=2048)
     parser.add_argument('--run-dir')
     parser.add_argument('--expansions', nargs='+', default=['base', 'unseen_forces'])
     args = parser.parse_args()
