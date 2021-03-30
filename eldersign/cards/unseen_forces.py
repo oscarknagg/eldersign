@@ -447,7 +447,8 @@ the_director_s_safe = UnorderedAdventure(
     trophy_value=1,
     rewards=[
         effect.AddItem(item.UniqueItem),
-        effect.NotImplementedEffect("Draw the top 2 cards of the Adventure deck and claim them as trophies as well")
+        # Approximation of "Draw the top 2 cards of the Adventure deck and claim them as trophies as well"
+        effect.AddTrophies([1, 2])
     ],
     penalties=[
         effect.AddHealth(-2),

@@ -1,9 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import List, Type, TypeVar, Optional
+from typing import List, Type, TypeVar, Optional, Union
 import logging
 import random
 
-from eldersign.core import AbstractEffect, AdventureEffect, Investigator, InvestigatorEffect, Board
+from eldersign.core import AbstractEffect, AdventureEffect, Investigator, InvestigatorEffect, Board, TrophyMixin
 from eldersign.symbol import Terror
 from eldersign.item import Item
 
@@ -181,7 +180,8 @@ class ThreeDoomsIfAnyMonster(AdventureEffect):
 
 class MonsterAppearsOnEveryMonsterTask(AdventureEffect):
     def apply_effect(self, adventure_attempt, eldersign):
-        pass  # Monsters not implemented yet
+        # Approximate with +2
+        eldersign.num_monsters += 2
 
 
 class ImmediatelyFail(AdventureEffect):
@@ -251,6 +251,15 @@ class SpendTrophies(InvestigatorEffect):
 
     def check_requirements(self, investigator: 'Investigator') -> bool:
         return sum(t.trophy_value for t in investigator.trophies) >= self.value
+
+
+class AddTrophies(InvestigatorEffect):
+    def __init__(self, values: Union[int, List[int]]):
+        self.values = values
+
+    def apply_effect(self, investigator: 'Investigator'):
+        for v in self.values:
+            investigator.trophies.append(TrophyMixin(v))
 
 
 class NotImplementedEffect(AdventureEffect):
