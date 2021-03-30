@@ -1,0 +1,16 @@
+{
+  "ancient_one.elder_sign": 1,
+  "ancient_one.doom_token": -1.1,
+  "character.health": 0.15,
+  "character.sanity": 0.15,
+  "character.CommonItem": 0.25,
+  "character.UniqueItem": 0.35,
+  "character.Spell": 0.25,
+  "character.Ally": 0.4,
+  "character.Clue": 0.2,
+  "character.blessed": 0.7,
+  "character.cursed": -0.8,
+  "monster": -0.2,
+  "clock.turn": -0.17,
+  "trophy_point": 0.1
+}
