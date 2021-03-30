@@ -63,14 +63,12 @@ class AdventureAttempt:
     def __init__(self,
                  adventure: AbstractAdventure,
                  dice_pool: DicePool,
-                 character: Any,
-                 num_clues: int = 0,
+                 character: Investigator,
                  clue_policy: Optional[CluePolicy] = None,
                  focus_policy: Optional[FocusPolicy] = None):
         self.adventure = adventure
         self.dice_pool = dice_pool
-        self.character = character
-        self.num_clues = num_clues
+        self.investigator = character
         self.clue_policy = clue_policy or FreezeMatchedDice(reroll_investigation_below=3)
         self.focus_policy = focus_policy or NeverFocus()
 
@@ -78,7 +76,7 @@ class AdventureAttempt:
 
     def _apply_membership(self):
         for task in self.adventure.tasks:
-            if self.character.membership and task.membership == self.character.membership:
+            if self.investigator.membership and task.membership == self.investigator.membership:
                 log.debug("Completing task {} due to membership".format(task))
                 self.adventure.complete_task(task)
 
@@ -90,7 +88,7 @@ class AdventureAttempt:
 
         for effect in consequences:
             if isinstance(effect, InvestigatorEffect):
-                effect.apply_effect(self.character)
+                effect.apply_effect(self.investigator)
             elif isinstance(effect, AdventureEffect):
                 effect.apply_effect(self, self.adventure.board)
             else:
@@ -120,7 +118,7 @@ class AdventureAttempt:
             log.debug('Rolled {}'.format(','.join(str(d.symbol) for d in self.dice_pool)))
 
             # Check result
-            successful_tasks = self.adventure.check(self.dice_pool, self.character)
+            successful_tasks = self.adventure.check(self.dice_pool, self.investigator)
             # What's in successful task?
             # A list of matches
             # - Each match contains a reference to the task being completed
@@ -134,7 +132,7 @@ class AdventureAttempt:
                 self.dice_pool.remove(successful_tasks[0].dice)
                 self.dice_pool.unfreeze()
                 for cost in task_to_complete.costs:
-                    cost.apply(self.character)
+                    cost.apply(self.investigator)
             else:
                 # Handle failures
                 # Apply terror
@@ -142,10 +140,11 @@ class AdventureAttempt:
                     self.adventure.terror_effect(self, self.adventure.board)
 
                 # Apply clue policy
-                if self.num_clues > 0:
+                if len(self.investigator.clues) > 0:
+                    log.debug("Using a clue with {} clues remaining".format(len(self.investigator.clues)))
                     # Retry using a clue to re-roll
                     self.clue_policy.act(self.dice_pool, self.adventure)
-                    self.num_clues -= 1
+                    self.investigator.remove_clue()
                     continue
 
                 # Apply focus policy

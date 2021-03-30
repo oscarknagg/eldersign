@@ -17,7 +17,7 @@ class InvestigatorAttemptingAdventure(AdventureEffect):
         self.effect = effect
 
     def apply_effect(self, adventure_atttempt, eldersign: Board):
-        self.effect(adventure_atttempt.character)
+        self.effect(adventure_atttempt.investigator)
 
 
 class EffectChoice(AbstractEffect):
@@ -85,7 +85,7 @@ class InvestigatorAdventureEffect(AdventureEffect):
         self.effect = effect
 
     def apply_effect(self, adventure_attempt, eldersign):
-        self.effect(adventure_attempt.character)
+        self.effect(adventure_attempt.investigator)
 
 
 class EachInvestigator(AdventureEffect):
@@ -199,17 +199,17 @@ class AddItem(AdventureEffect):
         if self.amount > 0:
             for i in range(self.amount):
                 drawn_item = eldersign.decks[self.item_type].draw()
-                adventure_attempt.character.items.append(drawn_item)
+                adventure_attempt.investigator.items.append(drawn_item)
         else:
             to_remove = []
-            for item in adventure_attempt.character.items:
+            for item in adventure_attempt.investigator.items:
                 if isinstance(item, self.item_type):
                     to_remove.append(item)
 
             for i in to_remove:
-                adventure_attempt.character.items.remove(i)
+                adventure_attempt.investigator.items.remove(i)
 
-            log.debug("Removed {} items from {}".format(len(to_remove), adventure_attempt.character))
+            log.debug("Removed {} items from {}".format(len(to_remove), adventure_attempt.investigator))
 
 
 class OpenGate(AdventureEffect):

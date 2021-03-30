@@ -452,7 +452,7 @@ class Board:
         decks = {}
         for item_type in [item.CommonItem, item.UniqueItem, item.Spell, item.Ally, item.Clue]:
             items = []
-            for i in range(10):
+            for i in range(5):
                 items.append(item_type())
 
             decks[item_type] = Deck(items)
@@ -517,3 +517,12 @@ class Investigator:
             ]
         }
         return state_dict
+
+    @property
+    def clues(self) -> List[item.Clue]:
+        return [i for i in self.items if isinstance(i, item.Clue)]
+
+    def remove_clue(self):
+        for i, _ in enumerate(self.items):
+            if isinstance(self.items[i], item.Clue):
+                self.items.pop(i)

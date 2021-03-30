@@ -7,6 +7,7 @@ import pytest
 from eldersign import cards
 from eldersign import core
 from eldersign import dice
+from eldersign import item
 from eldersign.adventure import AdventureAttempt
 from eldersign.policy.clue import NaiveCluePolicy
 
@@ -19,6 +20,7 @@ log.setLevel("DEBUG")
 def test_single_adventure(adventure: core.AbstractAdventure):
     board = core.Board.setup_dummy_game(adventure)
     character = board.characters[0]
+    character.items.append(item.Clue())
 
     def _test_single_adventure(adventure: core.AbstractAdventure):
         """Runs until success"""
@@ -31,7 +33,6 @@ def test_single_adventure(adventure: core.AbstractAdventure):
                 adventure,
                 dice_pool,
                 character,
-                num_clues=0,
                 clue_policy=NaiveCluePolicy(),
             )
             succeeded = adventure_attempt.attempt()

@@ -9,12 +9,13 @@ import os
 from eldersign import cards
 from eldersign import core
 from eldersign import dice
+from eldersign import item
 from eldersign.adventure import AdventureAttempt
 from eldersign.policy.clue import FreezeMatchedDice
 
 
 log = logging.getLogger()
-log.setLevel('INFO')
+log.setLevel('DEBUG')
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(levelname)s.%(module)s.%(funcName)s Line:%(lineno)d: %(asctime)s %(message)s')
 handler.setFormatter(fmt=formatter)
@@ -22,15 +23,15 @@ log.addHandler(handler)
 
 
 SCENARIOS = [
-    {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0},
-    {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0},
-    {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0},
-    {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0},
-    {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0},
+    # {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0},
+    # {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0},
+    # {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0},
+    # {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0},
+    # {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0},
     {'name': 'clue',            'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 1},
-    {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3},
+    # {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
+    # {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
+    # {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3},
 ]
 
 
@@ -39,11 +40,12 @@ def setup_attempt(adventure: core.AbstractAdventure, scenario: dict) -> Adventur
     board = core.Board.setup_dummy_game(deepcopy(adventure))
     copied_adventure.board = board
     dice_pool = dice.DicePool.from_dice_counts(**scenario['dice'])
+    for i in range(scenario['clue']):
+        board.characters[0].items.append(item.Clue())
     adventure_attempt = AdventureAttempt(
         copied_adventure,
         dice_pool,
         board.characters[0],
-        num_clues=scenario['clue'],
         clue_policy=FreezeMatchedDice(reroll_investigation_below=3),
     )
 
@@ -99,8 +101,8 @@ def main(args: argparse.Namespace):
                 starmap_args = list(zip(*starmap_args))
                 pool.starmap(run_attempt, starmap_args)
 
-        #     break
-        # break
+            break
+        break
 
     pool.close()
 
@@ -108,7 +110,7 @@ def main(args: argparse.Namespace):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-repeats', '-n', type=int, default=10000)
+    parser.add_argument('--num-repeats', '-n', type=int, default=1)
     parser.add_argument('--run-dir')
     parser.add_argument('--expansions', nargs='+', default=['base', 'unseen_forces'])
     args = parser.parse_args()
