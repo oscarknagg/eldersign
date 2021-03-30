@@ -164,12 +164,12 @@ class DiscardAllTerrorDice(AdventureEffect):
 
 class MonsterAppearsHere(AdventureEffect):
     def apply_effect(self, adventure_attempt, eldersign):
-        pass  # Monsters not implemented yet
+        eldersign.num_monsters += 1
 
 
 class MonsterAppears(AdventureEffect):
     def apply_effect(self, adventure_attempt, eldersign):
-        pass  # Monsters not implemented yet
+        eldersign.num_monsters += 1
 
 
 class ThreeDoomsIfAnyMonster(AdventureEffect):

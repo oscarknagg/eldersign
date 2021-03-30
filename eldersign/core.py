@@ -430,6 +430,9 @@ class Board:
 
         self.clock = Clock(self)
 
+        # Just a hack for now
+        self.num_monsters = 0
+
     @classmethod
     def setup_dummy_game(cls, adventure: AbstractAdventure) -> 'Board':
         ancient_one = AncientOne(
@@ -477,7 +480,8 @@ class Board:
                 character.state_dict() for character in self.characters
             ],
             'ancient_one': self.ancient_one.state_dict(),
-            'clock': self.clock.state_dict()
+            'clock': self.clock.state_dict(),
+            'num_monsters': self.num_monsters
         }
 
         return state_dict
