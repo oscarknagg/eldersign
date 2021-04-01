@@ -531,7 +531,7 @@ gala_in_the_great_hall = UnorderedAdventure(
 )
 
 please_do_not_touch_the_exhibits = UnorderedAdventure(
-    name="Medusa Exhibit",
+    name="Please do not touch the exhibits",
     tasks=[
         Task([Terror(), Terror()], [SanityCost(1)]),
         Task([Skull(), Skull()], [HealthCost(1)]),
@@ -625,7 +625,7 @@ the_curator = UnorderedAdventure(
     rewards=[
         effect.AddItem(item.Clue),
         effect.AddItem(item.CommonItem),
-        effect.AddElderSign(12),
+        effect.AddElderSign(1),
     ],
     penalties=[
         effect.AddSanity(-2),

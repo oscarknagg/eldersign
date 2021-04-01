@@ -46,7 +46,7 @@ lingering_curse = UnorderedAdventure(
         Task([Investigation(3)]),
         Task([Scroll(), Scroll(), Skull()]),
     ],
-    trophy_value=2,
+    trophy_value=4,
     terror_effect=effect.InvestigatorAttemptingAdventure(effect.SetHealthSanity(health=1, sanity=1)),
     rewards=[
         effect.AddItem(item.UniqueItem, 2),
