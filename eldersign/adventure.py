@@ -87,6 +87,10 @@ class AdventureAttempt:
         else:
             consequences = self.adventure.penalties
 
+            # Loose blessing on failure
+            if self.investigator.blessed:
+                self.investigator.blessed = False
+
         for effect in consequences:
             if isinstance(effect, InvestigatorEffect):
                 effect.apply_effect(self.investigator)
