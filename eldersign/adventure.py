@@ -63,12 +63,12 @@ class AdventureAttempt:
     def __init__(self,
                  adventure: AbstractAdventure,
                  dice_pool: DicePool,
-                 character: Investigator,
+                 investigator: Investigator,
                  clue_policy: Optional[CluePolicy] = None,
                  focus_policy: Optional[FocusPolicy] = None):
         self.adventure = adventure
         self.dice_pool = dice_pool
-        self.investigator = character
+        self.investigator = investigator
         self.clue_policy = clue_policy or FreezeMatchedDice(reroll_investigation_below=3)
         self.focus_policy = focus_policy or NeverFocus()
 
@@ -83,6 +83,7 @@ class AdventureAttempt:
     def apply_consequences(self, succeeded: bool):
         if succeeded:
             consequences = self.adventure.rewards
+            self.investigator.trophies.append(self.adventure)
         else:
             consequences = self.adventure.penalties
 
@@ -93,6 +94,7 @@ class AdventureAttempt:
                 effect.apply_effect(self, self.adventure.board)
             else:
                 raise TypeError("{} of type {} is not expected.".format(effect, type(effect)))
+
 
     def finish(self, succeeded: bool):
         # Reset task status
