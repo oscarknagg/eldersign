@@ -12,5 +12,7 @@
   "character.cursed": -0.8,
   "monster": -0.2,
   "clock.turn": -0.17,
-  "trophy_point": 0.1
+  "trophy_point": 0.1,
+  "red_dice": 0.4,
+  "yellow_dice": 0.33
 }

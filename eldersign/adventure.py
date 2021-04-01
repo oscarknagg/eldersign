@@ -95,7 +95,6 @@ class AdventureAttempt:
             else:
                 raise TypeError("{} of type {} is not expected.".format(effect, type(effect)))
 
-
     def finish(self, succeeded: bool):
         # Reset task status
         self.force_failed = False
