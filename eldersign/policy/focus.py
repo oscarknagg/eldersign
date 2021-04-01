@@ -34,10 +34,15 @@ class FreezeRandomMatchingDice(FocusPolicy):
         matching_dice = []
         for d in dice:
             if isinstance(d.symbol, Investigation):
-                if d.value < self.ignore_investigation_below:
+                if d.symbol.value < self.ignore_investigation_below:
                     continue
 
             if d.symbol.__class__ in unique_symbols:
                 matching_dice.append(d)
 
-        return [random.choice(matching_dice)]
+        if matching_dice:
+            random_matching_dice = random.choice(matching_dice)
+            random_matching_dice.frozen = True
+            return [random_matching_dice]
+        else:
+            return []

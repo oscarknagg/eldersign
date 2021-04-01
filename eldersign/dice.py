@@ -95,6 +95,22 @@ class DicePool:
             d.frozen = False
 
     def discard(self) -> Dice:
+        # Do a first pass of unfrozen dice
+        for i, dice in enumerate(self.dice):
+            if dice.frozen:
+                continue
+
+            if isinstance(dice, GreenDice):
+                # Get rid of green first
+                return self.dice.pop(i)
+            elif isinstance(dice, YellowDice):
+                # Then yellow
+                return self.dice.pop(i)
+            else:
+                # Then red
+                return self.dice.pop(i)
+
+        # Otherwise pop a frozen dice
         for i, dice in enumerate(self.dice):
             if isinstance(dice, GreenDice):
                 # Get rid of green first
