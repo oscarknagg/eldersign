@@ -443,7 +443,7 @@ class Board:
         ancient_one.elder_signs = 5
 
         characters = []
-        for _ in range(3):
+        for _ in range(1):
             character = Investigator(
                 health=4,
                 sanity=4,
