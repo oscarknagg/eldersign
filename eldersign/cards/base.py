@@ -163,7 +163,7 @@ don_t_fall_asleep = UnorderedAdventure(
 )
 
 the_hidden_passage = OrderedAdventure(
-    name="Something has broken free",
+    name="The Hidden Passage",
     tasks=[
         Task([Investigation(3)]),
         Task([Skull(), Investigation(3)]),
@@ -635,19 +635,18 @@ the_curator = UnorderedAdventure(
 the_hedge_maze = UnorderedAdventure(
     name="The Hedge Maze",
     tasks=[
-        EmptyMonsterTask(),
-        EmptyMonsterTask(),
-        Task([Skull(), Scroll(), Scroll()]),
+        Task([Investigation(2), Skull()]),
+        Task([Skull(), Skull()]),
     ],
     trophy_value=2,
     at_midnight_effect=effect.EachInvestigator(effect.AddHealth(-1)),
     rewards=[
         effect.MonsterAppears(),
-        effect.MonsterAppears(),
-        effect.AddElderSign(2),
+        effect.AddItem(item.CommonItem),
+        effect.AddItem(item.UniqueItem),
+        effect.AddElderSign(1),
     ],
     penalties=[
-        effect.AddSanity(-1),
         effect.AddHealth(-1)
     ],
 )

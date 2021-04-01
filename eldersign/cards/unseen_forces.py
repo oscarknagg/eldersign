@@ -112,7 +112,7 @@ seeking_leads = OrderedAdventure(
 )
 
 midnight_visitor = UnorderedAdventure(
-    name="Grazed Writings",
+    name="Midnight Visitor",
     tasks=[
         Task([Skull(), Skull()]),
         Task([Skull(), Terror()], [HealthCost(1)]),

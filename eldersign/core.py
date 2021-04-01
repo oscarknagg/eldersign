@@ -108,8 +108,7 @@ class TimeCost(Cost):
         return True
 
     def apply(self, character: 'Investigator'):
-        # TODO
-        pass
+        character.board.clock.add_hours(1)
 
 
 class SanityCost(Cost):
@@ -467,6 +466,8 @@ class Board:
             ancient_one=ancient_one,
             decks=decks
         )
+        for c in characters:
+            c.board = board
 
         return board
 
@@ -503,6 +504,8 @@ class Investigator:
 
         self.cursed = False
         self.blessed = False
+
+        self.board: Board = None
 
     def __repr__(self):
         return 'Character(health={},sanity={})'.format(self.health, self.sanity)
