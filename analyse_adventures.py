@@ -6,7 +6,6 @@ import argparse
 import logging
 import time
 import uuid
-import json
 import os
 
 from eldersign import cards
@@ -15,6 +14,7 @@ from eldersign import dice
 from eldersign import item
 from eldersign.adventure import AdventureAttempt
 from eldersign.policy.clue import FreezeMatchedDice
+from eldersign.policy.focus import FreezeRandomMatchingDice
 
 
 log = logging.getLogger()
@@ -26,15 +26,17 @@ log.addHandler(handler)
 
 
 SCENARIOS = [
-    {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0},
-    {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0},
-    {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0},
-    {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0},
-    {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0},
-    {'name': 'clue',            'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 1},
-    {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3},
-    {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3},
+    {'name': 'green_locked',    'dice': {'green': 5, 'yellow': 0, 'red': 0}, 'clue': 0, 'blessed': False},
+    {'name': 'default',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0, 'blessed': False},
+    {'name': 'blessed',         'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 0, 'blessed': True},
+    {'name': 'yellow',          'dice': {'green': 6, 'yellow': 1, 'red': 0}, 'clue': 0, 'blessed': False},
+    {'name': 'red',             'dice': {'green': 6, 'yellow': 0, 'red': 1}, 'clue': 0, 'blessed': False},
+    {'name': 'yellow+red',      'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 0, 'blessed': False},
+    {'name': 'clue',            'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 1, 'blessed': False},
+    {'name': 'clue*3',          'dice': {'green': 6, 'yellow': 0, 'red': 0}, 'clue': 3, 'blessed': False},
+    {'name': 'yellow+red+clue', 'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 1, 'blessed': False},
+    {'name': 'geared',          'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3, 'blessed': False},
+    {'name': 'geared+blessed',  'dice': {'green': 6, 'yellow': 1, 'red': 1}, 'clue': 3, 'blessed': True},
 ]
 
 
@@ -42,7 +44,11 @@ def setup_attempt(adventure: core.AbstractAdventure, scenario: dict) -> Adventur
     copied_adventure = deepcopy(adventure)
     board = core.Board.setup_dummy_game(deepcopy(adventure))
     copied_adventure.board = board
-    dice_pool = dice.DicePool.from_dice_counts(**scenario['dice'])
+    dice_counts = scenario['dice'].copy()
+    if scenario['blessed']:
+        board.characters[0].blessed = True
+        dice_counts['green'] += 1
+    dice_pool = dice.DicePool.from_dice_counts(**dice_counts)
     for i in range(scenario['clue']):
         board.characters[0].items.append(item.Clue())
     adventure_attempt = AdventureAttempt(
@@ -50,6 +56,7 @@ def setup_attempt(adventure: core.AbstractAdventure, scenario: dict) -> Adventur
         dice_pool,
         board.characters[0],
         clue_policy=FreezeMatchedDice(reroll_investigation_below=3),
+        focus_policy=FreezeRandomMatchingDice(ignore_investigation_below=3)
     )
 
     return adventure_attempt
@@ -64,14 +71,7 @@ def run_attempt(attempt: AdventureAttempt):
 
 
 def setup_dir(run_dir: str) -> str:
-    try:
-        os.makedirs(run_dir)
-    except FileExistsError:
-        split = run_dir.split('__')
-        if len(split) == 2:
-            run_dir = split[0] + '__' + str(int(split[1]) + 1)
-        else:
-            run_dir = run_dir + '__1'
+    os.makedirs(run_dir)
     return run_dir
 
 
@@ -143,7 +143,7 @@ def main(args: argparse.Namespace):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num-repeats', '-n', type=int, default=2048)
+    parser.add_argument('--num-repeats', '-n', type=int, default=2048*4)
     parser.add_argument('--run-dir')
     parser.add_argument('--expansions', nargs='+', default=['base', 'unseen_forces'])
     args = parser.parse_args()
