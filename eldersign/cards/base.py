@@ -46,7 +46,6 @@ did_you_hear_that = UnorderedAdventure(
         Task([Skull(), Skull()]),
     ],
     trophy_value=2,
-    terror_effect=effect.DiscardAllTerrorDice(),
     rewards=[
         effect.AddItem(item.Spell),
         effect.AddItem(item.UniqueItem),
