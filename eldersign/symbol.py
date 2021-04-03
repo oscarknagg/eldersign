@@ -14,6 +14,13 @@ class Symbol(ABC):
         """Returns a list of all combinations of symbols that match this one."""
         raise NotImplementedError
 
+    @property
+    def green_dice_equivalent(self) -> int:
+        if isinstance(self, Investigation):
+            return self.value
+        else:
+            return 3
+
 
 class SymbolUnion(Symbol):
     def __init__(self, symbols: List[Symbol]):

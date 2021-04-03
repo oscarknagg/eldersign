@@ -129,7 +129,8 @@ class AdventureAttempt:
             # - Each match contains a reference to the task being completed
             # - and the dice that it would take
             if successful_tasks:
-                # Choose first available successful task
+                # Choose "largest" successful task
+                successful_tasks = sorted(successful_tasks, key=lambda x: x.green_dice_equivalent, reverse=True)
                 task_to_complete = successful_tasks[0].task
                 self.adventure.complete_task(task_to_complete)
                 log.debug("Requirements met, completing task {}.".format(self.adventure.tasks.index(task_to_complete)))

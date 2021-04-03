@@ -6,7 +6,7 @@ import random
 
 from eldersign.dice import Dice, DicePool
 from eldersign.item import Item
-from eldersign.symbol import Symbol
+from eldersign.symbol import Symbol, Investigation
 from eldersign import item
 
 
@@ -214,6 +214,10 @@ class SuccessfulTaskOption:
 
     def __repr__(self):
         return 'SuccessfulTask(task={}, dice=[{}])'.format(self.task, ','.join([str(d) for d in self.dice]))
+
+    @property
+    def green_dice_equivalent(self) -> int:
+        return sum(d.symbol.green_dice_equivalent for d in self.dice)
 
 
 class CluePolicy(ABC):
