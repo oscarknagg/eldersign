@@ -167,8 +167,11 @@ class MonsterAppearsHere(AdventureEffect):
 
 
 class MonsterAppears(AdventureEffect):
+    def __init__(self, num_monsters: int = 1):
+        self.num_monsters = num_monsters
+
     def apply_effect(self, adventure_attempt, eldersign):
-        eldersign.num_monsters += 1
+        eldersign.num_monsters += self.num_monsters
 
 
 class ThreeDoomsIfAnyMonster(AdventureEffect):

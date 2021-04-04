@@ -191,8 +191,9 @@ up_on_the_roof = UnorderedAdventure(
         Task([Terror(), Skull(), Scroll()]),
     ],
     trophy_value=2,
-    entry_effect=effect.NotImplementedEffect("If there is no monster on this adventure place 1 monster on the task"
-                                             "below."),
+    # entry_effect=effect.NotImplementedEffect("If there is no monster on this adventure place 1 monster on the task"
+    #                                          "below."),
+    entry_effect=effect.MonsterAppears(num_monsters=0.5),
     rewards=[
         effect.AddItem(item.Spell),
         effect.AddDoomToken(-1),
